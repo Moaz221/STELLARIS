@@ -1,0 +1,253 @@
+<resources>
+    <string name="app_name">LungCare AI</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_health">صحتي</string>
+    <string name="nav_my_health">صحتي</string>
+    <string name="nav_assistant">المساعد الذكي</string>
+    <string name="nav_ai_assistant">المساعد الذكي</string>
+    <string name="nav_care">رحلتي العلاجية</string>
+    <string name="nav_care_journey">رحلتي العلاجية</string>
+    <string name="nav_profile">حسابي</string>
+
+    <!-- Home Screen -->
+    <string name="greeting_user">مرحباً، معاذ</string>
+    <string name="journey_early_detection">التوعية والكشف المبكر</string>
+    <string name="journey_under_eval">تحت التقييم الطبي</string>
+    <string name="journey_diagnosed">متابعة المريض المشخص</string>
+    <string name="hero_title">اعتني بصحة رئتيك اليوم</string>
+    <string name="hero_subtitle">تتبع الأعراض، واطلع على عوامل الخطر، وجهز أسئلتك للمناقشة مع طبيبك.</string>
+    <string name="hero_subtitle_under_eval">تتبع الفحوصات التشخيصية والأعراض، وتجهز لموعد الطبيب المختص.</string>
+    <string name="hero_subtitle_diagnosed">إدارة جدول العلاج اليومي، تسجيل الآثار الجانبية، وتنبيهات الأدوية.</string>
+    <string name="quick_actions">الإجراءات السريعة</string>
+    <string name="action_track_symptom">تسجيل عرض</string>
+    <string name="action_screening_guide">دليل الفحص</string>
+    <string name="action_doctor_questions">أسئلة الطبيب</string>
+    <string name="action_medical_records">السجلات الطبية</string>
+
+    <string name="home_welcome">أهلاً بك،</string>
+    <string name="home_welcome_title">رعاية الرئة</string>
+    <string name="home_notifications">الإشعارات</string>
+    <string name="home_lung_status">حالة الرئة</string>
+    <string name="home_vision_headline">تحليل وتقييم جودة الأشعة السينية بالذكاء الاصطناعي</string>
+    <string name="home_track_symptom_hint">تسجيل السعال أو الألم</string>
+    <string name="home_open_screening_hint">استحقاق فحص LDCT</string>
+    <string name="home_open_questions_hint">تجهيز أسئلة الموعد</string>
+    <string name="home_medical_records_hint">رفع الأشعة والتقارير</string>
+    <string name="home_change_language">تغيير اللغة</string>
+    <string name="home_change_theme">تغيير المظهر</string>
+    <string name="home_your_journey">رحلتك الصحية</string>
+    <string name="home_choose">اختيار</string>
+    <string name="home_edit">تعديل</string>
+    <string name="home_journey_early">الكشف المبكر</string>
+    <string name="home_journey_evaluation">تحت التقييم</string>
+    <string name="home_journey_diagnosed">مريض مُشَخّص</string>
+    <string name="home_journey_unselected">غير محدد</string>
+    <string name="home_step_early_title">الفحص وتقييم المخاطر</string>
+    <string name="home_step_eval_title">خطوات التشخيص والتقييم</string>
+    <string name="home_step_care_title">العلاج والمتابعة</string>
+    <string name="home_step_default_title">الخطوة القادمة الموصى بها</string>
+    <string name="home_step_early_desc">تأكد من استحقاقك لفحص الأشعة المقطعية منخفضة الجرعة.</string>
+    <string name="home_step_eval_desc">جهز تقاريرك الطبية والأسئلة لمناقشتها مع طبيبك المعالج.</string>
+    <string name="home_step_care_desc">سجل أعراضك اليومية وتابع مواعيد الأدوية.</string>
+    <string name="home_step_default_desc">اطلع على إرشادات الفحص المبكر وسجل أعراضك.</string>
+
+    <!-- Rotating messages for Early Detection -->
+    <string name="home_rotating_early_1">الاكتشاف المبكر ينقذ الأرواح — كن استباقياً اليوم</string>
+    <string name="home_rotating_early_2">فحص بسيط لـ 5 دقائق قد يغير مستقبلك</string>
+    <string name="home_rotating_early_3">اعرف عوامل الخطر لديك وتصرف مبكراً</string>
+    <string name="home_rotating_early_4">الوقاية هي أقوى دواء</string>
+
+    <!-- Rotating messages for Under Evaluation -->
+    <string name="home_rotating_eval_1">جهّز الأسئلة الصحيحة لطبيبك</string>
+    <string name="home_rotating_eval_2">تابع كل عرض — التفاصيل مهمة</string>
+    <string name="home_rotating_eval_3">احفظ سجلاتك الطبية منظمة</string>
+    <string name="home_rotating_eval_4">أنت لست وحدك في هذه الرحلة</string>
+
+    <!-- Rotating messages for Diagnosed -->
+    <string name="home_rotating_care_1">سجّل أعراض اليوم لمساعدة فريق الرعاية</string>
+    <string name="home_rotating_care_2">حافظ على الاستمرار مع جدول علاجك</string>
+    <string name="home_rotating_care_3">خطوات يومية صغيرة تقود إلى تقدم كبير</string>
+    <string name="home_rotating_care_4">رحلتك مهمة — تابع تقدمك</string>
+
+    <!-- Rotating messages for Default -->
+    <string name="home_rotating_default_1">مرحباً بك في رفيق صحة الرئة</string>
+    <string name="home_rotating_default_2">اختر رحلتك للحصول على إرشادات مخصصة</string>
+    <string name="home_rotating_default_3">المعرفة هي الخطوة الأولى نحو الشفاء</string>
+    <string name="home_rotating_default_4">رحلتك الصحية تبدأ هنا</string>
+
+    <string name="home_open_screening">دليل الفحص</string>
+    <string name="home_open_questions">أسئلة الطبيب</string>
+    <string name="home_track_symptom">تسجيل عرض</string>
+    <string name="home_next_step">الخطوة القادمة</string>
+    <string name="home_quick_actions">الإجراءات السريعة</string>
+    <string name="home_medical_records">السجلات الطبية</string>
+    <string name="home_tip_title">نصيحة صحية يومية</string>
+    <string name="home_tip_body">الفحص الدوري والكشف المبكر يرفعان نسبة نجاح العلاج بشكل كبير.</string>
+    <string name="home_read_more">قراءة المزيد</string>
+    <string name="home_articles_title">مقالات وإرشادات صحية</string>
+    <string name="home_view_all">عرض الكل</string>
+    <string name="home_read_article">قراءة المقال</string>
+    <string name="home_vision_title">معمل الذكاء الاصطناعي للرؤية</string>
+    <string name="home_demo">تجريبي</string>
+    <string name="home_vision_description">جرب تحليل صور الأشعة السينية والتأكد من جودتها مباشرة.</string>
+    <string name="home_vision_open">فتح معمل الرؤية</string>
+    <string name="home_close">إغلاق</string>
+    <string name="home_article_disclaimer">المعلومات المذكورة في المقالات للتوعية فقط ولا تغني عن الاستشارة والتشخيص الطبي.</string>
+    <string name="home_article_visit_title">التجهيز لزيارة الطبيب</string>
+    <string name="home_article_visit_summary">خطوات هامة للاستفادة القصوى من موعدك الطبي.</string>
+    <string name="home_article_visit_body">احرص على إحضار تاريخك الطبي والتقارير الأخيرة وقائمة بالأدوية التي تتناولها لضمان استشارة مثمرة.</string>
+    <string name="home_article_questions_title">أسئلة هامة لطبيبك المختص</string>
+    <string name="home_article_questions_summary">أسئلة جوهرية تخص فحص صحة الرئة والتشخيص.</string>
+    <string name="home_article_questions_body">اسأل عن مدى استحقاقك لفحص LDCT، والأعراض التي تتطلب الانتباه، والفحوصات القادمة.</string>
+    <string name="home_article_records_title">تنظيم سجلاتك الطبية</string>
+    <string name="home_article_records_summary">تتبع صور الأشعة، نتائج التحاليل، والروشتات الطبية.</string>
+    <string name="home_article_records_body">احفظ نسخك الرقمية من التقارير في حسابك لسهولة الوصول إليها أثناء زيارة الطبيب.</string>
+
+    <!-- Vision Lab Card -->
+    <string name="vision_lab_title">معمل الرؤية الحاسوبية</string>
+    <string name="vision_lab_desc">التقاط أو رفع أشعة سينية للصدر لتقييم الجودة بالذكاء الاصطناعي (تجريبي)</string>
+    <string name="vision_lab_btn">فتح معمل الرؤية</string>
+    <string name="vision_engine_ready">محرك تحليل الأشعة السينية • جاهز</string>
+    <string name="demo_tag">تجريبي</string>
+
+    <!-- General Actions -->
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="title_desc_placeholder">العنوان / الوصف</string>
+
+    <!-- Health Screen -->
+    <string name="tab_symptoms">الأعراض</string>
+    <string name="tab_records">السجلات الطبية</string>
+    <string name="add_symptom">إضافة عرض جديد</string>
+    <string name="add_record">إضافة تقرير طبي</string>
+    <string name="recent_symptoms">الأعراض المسجلة مؤخراً</string>
+    <string name="urgent_notice_title">تنبيه سلامة هام</string>
+    <string name="urgent_notice_desc">إذا كنت تعاني من ضيق شديد في التنفس أو خروج دم مع السعال، يرجى التوجه فوراً للرعاية الطبية الطارئة.</string>
+
+    <!-- AI Assistant -->
+    <string name="assistant_title">مساعد LungCare الذكي</string>
+    <string name="assistant_subtitle">اسأل عن صحة الرئة، الأعراض، أو إرشادات الفحص المبكر.</string>
+    <string name="assistant_disclaimer">محتوى الذكاء الاصطناعي للتوعية فقط وليس بديلاً عن الاستشارة الطبية.</string>
+    <string name="ask_placeholder">اكتب سؤالك هنا…</string>
+
+    <!-- Care Journey -->
+    <string name="care_title">رحلة الرعاية والتتبع</string>
+    <string name="diagnosis_info">تفاصيل التشخيص</string>
+    <string name="treatment_schedule">جدول الخطة العلاجية</string>
+    <string name="side_effects">تتبع الآثار الجانبية</string>
+    <string name="medications">الأدوية والتذكيرات</string>
+
+    <!-- Profile -->
+    <string name="profile_title">الملف الشخصي والإعدادات</string>
+    <string name="personal_info">المعلومات الشخصية</string>
+    <string name="language">اللغة</string>
+    <string name="theme">المظهر</string>
+    <string name="journey_mode">نوع الرحلة الصحية</string>
+    <string name="privacy_consent">الخصوصية والموافقة</string>
+
+    <!-- Risk Assessment & Screening -->
+    <string name="risk_title">تقييم المخاطر ودليل فحص LDCT</string>
+    <string name="risk_age">الفئة العمرية</string>
+    <string name="smoking_history">تاريخ التدخين</string>
+    <string name="pack_years">معدل العلبة-سنة (عدد العلب يومياً × السنين)</string>
+    <string name="calculate_risk">تقييم الاستحقاق لفحص الأشعة المقطعية</string>
+    <string name="ldct_recommended">مؤهل لإجراء فحص LDCT السنوي</string>
+    <string name="ldct_not_recommended">مستوى مخاطر اعتيادي — يوصى بالتوعية العامة</string>
+    <string name="ldct_info_text">الأشعة المقطعية منخفضة الجرعة (LDCT) هي الفحص الوحيد الموصى به علمياً للكشف المبكر للأشخاص الأكثر عرضة للخطر (الأعمار 50-80 ومعدل تدخين 20+ علبة-سنة).</string>
+
+    <!-- Doctor Questions -->
+    <string name="questions_title">أسئلة مناقشة الطبيب</string>
+    <string name="add_question">إضافة سؤال جديد</string>
+    <string name="answered_questions">الأسئلة التي تم توضيحها</string>
+
+    <!-- Education Hub -->
+    <string name="education_title">مركز التوعية ومقالات الفحص المبكر</string>
+
+    <!-- My Health Screen -->
+    <string name="my_health_title">صحتي</string>
+    <string name="my_health_subtitle">نظرة عامة على صحتك الشخصية</string>
+
+    <!-- Overview -->
+    <string name="my_health_risk_profile">ملف المخاطر الخاص بك</string>
+    <string name="my_health_risk_low">منخفض</string>
+    <string name="my_health_risk_moderate">متوسط</string>
+    <string name="my_health_risk_elevated">مرتفع</string>
+    <string name="my_health_risk_factors_found">%d عوامل خطر محددة</string>
+    <string name="my_health_risk_disclaimer">بناءً على استبيانك. هذا تعليمي وليس تقييماً سريرياً.</string>
+
+    <string name="my_health_eval_status">حالة التقييم</string>
+    <string name="my_health_care_overview">نظرة عامة على الرعاية</string>
+    <string name="my_health_treatment_day">أيام</string>
+    <string name="my_health_meds_count">%d أدوية نشطة</string>
+    <string name="my_health_next_appt">القادم: %s</string>
+
+    <!-- Sections -->
+    <string name="my_health_risk_factors">عوامل الخطر</string>
+    <string name="my_health_factors_active">نشطة</string>
+    <string name="my_health_symptoms">الأعراض</string>
+    <string name="my_health_active">نشطة</string>
+    <string name="my_health_active_symptoms">الأعراض النشطة</string>
+    <string name="my_health_test_results">نتائج الفحوصات</string>
+    <string name="my_health_pending">معلقة</string>
+    <string name="my_health_records">السجلات</string>
+    <string name="my_health_doctor_questions">أسئلة للطبيب</string>
+    <string name="my_health_unanswered">بدون إجابة</string>
+    <string name="my_health_medications">الأدوية</string>
+    <string name="my_health_current">حالية</string>
+    <string name="my_health_side_effects">الآثار الجانبية</string>
+    <string name="my_health_timeline">الخط الزمني الصحي</string>
+    <string name="my_health_see_all">عرض الكل</string>
+
+    <!-- Screening -->
+    <string name="my_health_screening_due">يُنصح بالفحص</string>
+
+    <!-- Education -->
+    <string name="my_health_learn_more">تعرف على صحة الرئة</string>
+    <string name="my_health_learn_desc">مقالات وأدلة مبنية على الأدلة</string>
+
+    <!-- Appointment -->
+    <string name="my_health_next_appointment">الموعد القادم</string>
+
+    <!-- Disclaimer -->
+    <string name="my_health_medical_disclaimer">هذه المعلومات للتنظيم الشخصي والتعليم فقط. لا تغني عن الاستشارة الطبية المتخصصة أو التشخيص أو العلاج. استشر طبيبك دائماً.</string>
+
+    <!-- Symptom Tracker -->
+    <string name="symptom_tracker_title">متتبع الأعراض</string>
+    <string name="symptom_tracker_early_mode">وضع الكشف المبكر</string>
+    <string name="symptom_tracker_eval_mode">متابعة التقييم الطبي</string>
+    <string name="symptom_tracker_care_mode">سجل العلاج والرعاية</string>
+    <string name="symptom_tracker_emergency_alert">تنبيه السلامة الطبية</string>
+    <string name="symptom_tracker_call_doctor">اتصال بالطوارئ / الطبيب</string>
+    <string name="symptom_tracker_logged_symptoms">الأعراض المسجلة</string>
+    <string name="symptom_tracker_log_symptom">تسجيل عرض</string>
+    <string name="symptom_tracker_filter_all">جميع السجلات</string>
+    <string name="symptom_tracker_filter_active">النشطة</string>
+    <string name="symptom_tracker_filter_urgent">حالات حادة / طوارئ 🚨</string>
+    <string name="symptom_tracker_filter_resolved">تم التعافي</string>
+    <string name="symptom_tracker_stats_active">نشط</string>
+    <string name="symptom_tracker_stats_urgent">حرج</string>
+    <string name="symptom_tracker_stats_total">الإجمالي</string>
+    <string name="symptom_tracker_export_summary">تصدير التقرير</string>
+    <string name="symptom_tracker_doctor_report">تقرير ملخص للطبيب</string>
+    <string name="symptom_tracker_copy_summary">نسخ التقرير</string>
+    <string name="symptom_tracker_copied_toast">تم نسخ التقرير إلى الحافظة!</string>
+    <string name="symptom_tracker_no_symptoms">لم يتم تسجيل أي أعراض بعد</string>
+    <string name="symptom_tracker_no_active">لا توجد أعراض نشطة</string>
+    <string name="symptom_tracker_no_urgent">لا توجد تنبيهات حادة أو حرجة</string>
+    <string name="symptom_tracker_no_resolved">لا توجد أعراض متعافى منها</string>
+    <string name="symptom_tracker_empty_hint">استخدم زر \"تسجيل عرض\" لمتابعة التغيرات.</string>
+    <string name="symptom_tracker_log_new">تسجيل عرض جديد</string>
+    <string name="symptom_tracker_edit_entry">تعديل عرض مسجل</string>
+    <string name="symptom_tracker_quick_preset">اختيار سريع من القائمة:</string>
+    <string name="symptom_tracker_name_label">اسم العرض</string>
+    <string name="symptom_tracker_severity_label">شدة العرض:</string>
+    <string name="symptom_tracker_frequency_label">معدل التكرار:</string>
+    <string name="symptom_tracker_triggers_label">المحفزات (مثال: الهواء البارد، صعود السلم)</string>
+    <string name="symptom_tracker_notes_label">ملاحظات للطبيب</string>
+    <string name="symptom_tracker_save_entry">حفظ العرض</string>
+    <string name="symptom_tracker_mark_active">تحديد كـ نشط</string>
+    <string name="symptom_tracker_mark_resolved">تحديد كـ تم التعافي</string>
+    <string name="symptom_tracker_delete_log">حذف السجل</string>
+</resources>

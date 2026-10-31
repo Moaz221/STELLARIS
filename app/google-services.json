@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "711048184229",
+    "project_id": "stellaris-ai",
+    "storage_bucket": "stellaris-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:711048184229:android:c294989d026c4be52ae84c",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "711048184229-had8hqvb0ablohjm8mbri0epdv13v70i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapplication",
+            "certificate_hash": "d0dc86977c7a1b00f704a42ae5dcdb7cbc0fe29a"
+          }
+        },
+        {
+          "client_id": "711048184229-had8hqvb0ablohjm8mbri0epdv13v70i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapplication",
+            "certificate_hash": "fb6dac78480a72317df729443e4999981a3255bc5c7bf13e6160009ebccbcab8"
+          }
+        },
+        {
+          "client_id": "711048184229-iisubsfueec6mac43mtck5b383804983.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuuVRa5E0vV_xdvAn5n9SYTpWLTHokolY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "711048184229-iisubsfueec6mac43mtck5b383804983.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

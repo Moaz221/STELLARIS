@@ -1,0 +1,253 @@
+<resources>
+    <string name="app_name">LungCare AI</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_home">Home</string>
+    <string name="nav_health">My Health</string>
+    <string name="nav_my_health">My Health</string>
+    <string name="nav_assistant">AI Assistant</string>
+    <string name="nav_ai_assistant">AI Assistant</string>
+    <string name="nav_care">Care Journey</string>
+    <string name="nav_care_journey">Care Journey</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Home Screen -->
+    <string name="greeting_user">Hello, Moaz</string>
+    <string name="journey_early_detection">Early Detection Education</string>
+    <string name="journey_under_eval">Under Medical Evaluation</string>
+    <string name="journey_diagnosed">Diagnosed Patient Care</string>
+    <string name="hero_title">Take Charge of Your Lung Health</string>
+    <string name="hero_subtitle">Track symptoms, learn risk factors, and prepare questions for your doctor.</string>
+    <string name="hero_subtitle_under_eval">Track diagnostic imaging, symptoms, and prepare for your specialist appointment.</string>
+    <string name="hero_subtitle_diagnosed">Manage your daily treatment schedule, side-effect logs, and medication reminders.</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="action_track_symptom">Track Symptom</string>
+    <string name="action_screening_guide">Screening Guide</string>
+    <string name="action_doctor_questions">Doctor Questions</string>
+    <string name="action_medical_records">Medical Records</string>
+
+    <string name="home_welcome">Welcome Back,</string>
+    <string name="home_welcome_title">Lung Care</string>
+    <string name="home_notifications">Notifications</string>
+    <string name="home_lung_status">LUNG STATUS</string>
+    <string name="home_vision_headline">AI Chest X-Ray Quality &amp; Screening Analysis</string>
+    <string name="home_track_symptom_hint">Log cough or pain</string>
+    <string name="home_open_screening_hint">Eligibility &amp; LDCT</string>
+    <string name="home_open_questions_hint">Prepare visit questions</string>
+    <string name="home_medical_records_hint">Upload scans &amp; reports</string>
+    <string name="home_change_language">Change language</string>
+    <string name="home_change_theme">Toggle theme</string>
+    <string name="home_your_journey">Your Journey</string>
+    <string name="home_choose">Choose</string>
+    <string name="home_edit">Edit</string>
+    <string name="home_journey_early">Early Detection</string>
+    <string name="home_journey_evaluation">Under Evaluation</string>
+    <string name="home_journey_diagnosed">Diagnosed Patient</string>
+    <string name="home_journey_unselected">Not Selected</string>
+    <string name="home_step_early_title">Screening &amp; Risk Assessment</string>
+    <string name="home_step_eval_title">Diagnostic Steps</string>
+    <string name="home_step_care_title">Treatment &amp; Follow-up</string>
+    <string name="home_step_default_title">Recommended Next Step</string>
+    <string name="home_step_early_desc">Check if you are eligible for low-dose CT screening.</string>
+    <string name="home_step_eval_desc">Prepare your medical records and questions for your doctor.</string>
+    <string name="home_step_care_desc">Log daily symptoms and manage medication reminders.</string>
+    <string name="home_step_default_desc">Explore screening guidelines and track your symptoms.</string>
+
+    <!-- Rotating messages for Early Detection -->
+    <string name="home_rotating_early_1">Early detection saves lives — stay proactive today</string>
+    <string name="home_rotating_early_2">A 5-minute screening can change your future</string>
+    <string name="home_rotating_early_3">Know your risk factors and act early</string>
+    <string name="home_rotating_early_4">Prevention is the strongest medicine</string>
+
+    <!-- Rotating messages for Under Evaluation -->
+    <string name="home_rotating_eval_1">Prepare the right questions for your doctor</string>
+    <string name="home_rotating_eval_2">Track every symptom — details matter</string>
+    <string name="home_rotating_eval_3">Keep your medical records organized</string>
+    <string name="home_rotating_eval_4">You are not alone in this journey</string>
+
+    <!-- Rotating messages for Diagnosed -->
+    <string name="home_rotating_care_1">Log today\'s symptoms to help your care team</string>
+    <string name="home_rotating_care_2">Stay consistent with your treatment schedule</string>
+    <string name="home_rotating_care_3">Small daily steps lead to big progress</string>
+    <string name="home_rotating_care_4">Your journey matters — track your progress</string>
+
+    <!-- Rotating messages for Default -->
+    <string name="home_rotating_default_1">Welcome to your lung health companion</string>
+    <string name="home_rotating_default_2">Choose your journey to get personalized guidance</string>
+    <string name="home_rotating_default_3">Knowledge is the first step toward healing</string>
+    <string name="home_rotating_default_4">Your health journey starts here</string>
+
+    <string name="home_open_screening">Screening Guide</string>
+    <string name="home_open_questions">Doctor Questions</string>
+    <string name="home_track_symptom">Track Symptom</string>
+    <string name="home_next_step">NEXT STEP</string>
+    <string name="home_quick_actions">Quick Actions</string>
+    <string name="home_medical_records">Medical Records</string>
+    <string name="home_tip_title">Daily Health Tip</string>
+    <string name="home_tip_body">Regular screening and early detection significantly improve lung health outcomes.</string>
+    <string name="home_read_more">Read More</string>
+    <string name="home_articles_title">Health Articles &amp; Guides</string>
+    <string name="home_view_all">View All</string>
+    <string name="home_read_article">Read Article</string>
+    <string name="home_vision_title">AI Computer Vision Lab</string>
+    <string name="home_demo">DEMO</string>
+    <string name="home_vision_description">Experience chest X-ray image analysis and quality verification in real time.</string>
+    <string name="home_vision_open">Open Vision Lab</string>
+    <string name="home_close">Close</string>
+    <string name="home_article_disclaimer">Information provided in articles is for educational purposes only and does not replace medical diagnosis.</string>
+    <string name="home_article_visit_title">Preparing for Your Medical Visit</string>
+    <string name="home_article_visit_summary">Essential steps to make the most out of your appointment.</string>
+    <string name="home_article_visit_body">Bring your medical history, recent lab results, and a list of current medications to ensure a productive consultation.</string>
+    <string name="home_article_questions_title">Questions to Ask Your Specialist</string>
+    <string name="home_article_questions_summary">Key questions regarding lung screening and diagnosis.</string>
+    <string name="home_article_questions_body">Ask about LDCT screening eligibility, symptoms to watch out for, and potential follow-up tests.</string>
+    <string name="home_article_records_title">Organizing Your Medical Records</string>
+    <string name="home_article_records_summary">Keep track of X-rays, lab test results, and prescriptions.</string>
+    <string name="home_article_records_body">Store scan digital copies in your account for easy access during doctor visits.</string>
+
+    <!-- Vision Lab Card -->
+    <string name="vision_lab_title">Computer Vision Lab</string>
+    <string name="vision_lab_desc">Capture or upload a chest X-ray for AI quality assessment (Demo)</string>
+    <string name="vision_lab_btn">Open Vision Lab</string>
+    <string name="vision_engine_ready">X-Ray Analysis Engine • Ready</string>
+    <string name="demo_tag">DEMO</string>
+
+    <!-- General Actions -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_desc_placeholder">Title / Description</string>
+
+    <!-- Health Screen -->
+    <string name="tab_symptoms">Symptoms</string>
+    <string name="tab_records">Medical Records</string>
+    <string name="add_symptom">Add Symptom</string>
+    <string name="add_record">Add Medical Record</string>
+    <string name="recent_symptoms">Recent Symptoms</string>
+    <string name="urgent_notice_title">Safety Notice</string>
+    <string name="urgent_notice_desc">If you experience severe shortness of breath or cough up blood, seek immediate emergency medical care.</string>
+
+    <!-- AI Assistant -->
+    <string name="assistant_title">LungCare Assistant</string>
+    <string name="assistant_subtitle">Ask questions about lung health, symptoms, or screening guidelines.</string>
+    <string name="assistant_disclaimer">AI content is for education only and not medical advice.</string>
+    <string name="ask_placeholder">Ask a question…</string>
+
+    <!-- Care Journey -->
+    <string name="care_title">Care Journey</string>
+    <string name="diagnosis_info">Diagnosis Overview</string>
+    <string name="treatment_schedule">Treatment Schedule</string>
+    <string name="side_effects">Side Effect Tracker</string>
+    <string name="medications">Medications &amp; Reminders</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile &amp; Settings</string>
+    <string name="personal_info">Personal Information</string>
+    <string name="language">Language</string>
+    <string name="theme">Theme Mode</string>
+    <string name="journey_mode">Journey Mode</string>
+    <string name="privacy_consent">Privacy &amp; Consent</string>
+
+    <!-- Risk Assessment & Screening -->
+    <string name="risk_title">Risk Assessment &amp; LDCT Guide</string>
+    <string name="risk_age">Age Group</string>
+    <string name="smoking_history">Smoking History</string>
+    <string name="pack_years">Pack-Years (Packs/Day × Years)</string>
+    <string name="calculate_risk">Evaluate LDCT Screening Eligibility</string>
+    <string name="ldct_recommended">Eligible for Annual LDCT Screening</string>
+    <string name="ldct_not_recommended">Standard Risk — General Education Recommended</string>
+    <string name="ldct_info_text">Low-Dose CT (LDCT) is the only recommended screening test for high-risk individuals aged 50–80 with a 20+ pack-year history.</string>
+
+    <!-- Doctor Questions -->
+    <string name="questions_title">Questions for Your Doctor</string>
+    <string name="add_question">Add Question</string>
+    <string name="answered_questions">Answered Questions</string>
+
+    <!-- Education Hub -->
+    <string name="education_title">Education &amp; Screening Articles</string>
+
+    <!-- My Health Screen -->
+    <string name="my_health_title">My Health</string>
+    <string name="my_health_subtitle">Your personal health overview</string>
+
+    <!-- Overview -->
+    <string name="my_health_risk_profile">Your Risk Profile</string>
+    <string name="my_health_risk_low">Low</string>
+    <string name="my_health_risk_moderate">Moderate</string>
+    <string name="my_health_risk_elevated">Elevated</string>
+    <string name="my_health_risk_factors_found">%d risk factors identified</string>
+    <string name="my_health_risk_disclaimer">Based on your questionnaire. This is educational, not a clinical assessment.</string>
+
+    <string name="my_health_eval_status">Evaluation Status</string>
+    <string name="my_health_care_overview">Care Overview</string>
+    <string name="my_health_treatment_day">Days</string>
+    <string name="my_health_meds_count">%d active medications</string>
+    <string name="my_health_next_appt">Next: %s</string>
+
+    <!-- Sections -->
+    <string name="my_health_risk_factors">Risk Factors</string>
+    <string name="my_health_factors_active">active</string>
+    <string name="my_health_symptoms">Symptoms</string>
+    <string name="my_health_active">active</string>
+    <string name="my_health_active_symptoms">Active Symptoms</string>
+    <string name="my_health_test_results">Test Results</string>
+    <string name="my_health_pending">pending</string>
+    <string name="my_health_records">Records</string>
+    <string name="my_health_doctor_questions">Questions for Doctor</string>
+    <string name="my_health_unanswered">unanswered</string>
+    <string name="my_health_medications">Medications</string>
+    <string name="my_health_current">current</string>
+    <string name="my_health_side_effects">Side Effects</string>
+    <string name="my_health_timeline">Health Timeline</string>
+    <string name="my_health_see_all">See all</string>
+
+    <!-- Screening -->
+    <string name="my_health_screening_due">Screening Recommended</string>
+
+    <!-- Education -->
+    <string name="my_health_learn_more">Learn About Lung Health</string>
+    <string name="my_health_learn_desc">Evidence-based articles and guides</string>
+
+    <!-- Appointment -->
+    <string name="my_health_next_appointment">Next Appointment</string>
+
+    <!-- Disclaimer -->
+    <string name="my_health_medical_disclaimer">This information is for personal organization and education only. It does not replace professional medical advice, diagnosis, or treatment. Always consult your healthcare provider.</string>
+
+    <!-- Symptom Tracker -->
+    <string name="symptom_tracker_title">Symptoms Tracker</string>
+    <string name="symptom_tracker_early_mode">Early Detection Mode</string>
+    <string name="symptom_tracker_eval_mode">Evaluation Tracking</string>
+    <string name="symptom_tracker_care_mode">Treatment &amp; Care Log</string>
+    <string name="symptom_tracker_emergency_alert">Medical Safety Alert</string>
+    <string name="symptom_tracker_call_doctor">Call Emergency / Doctor</string>
+    <string name="symptom_tracker_logged_symptoms">Logged Symptoms</string>
+    <string name="symptom_tracker_log_symptom">Log Symptom</string>
+    <string name="symptom_tracker_filter_all">All Logs</string>
+    <string name="symptom_tracker_filter_active">Active</string>
+    <string name="symptom_tracker_filter_urgent">Urgent / Severe 🚨</string>
+    <string name="symptom_tracker_filter_resolved">Resolved</string>
+    <string name="symptom_tracker_stats_active">Active</string>
+    <string name="symptom_tracker_stats_urgent">Urgent</string>
+    <string name="symptom_tracker_stats_total">Total Logged</string>
+    <string name="symptom_tracker_export_summary">Export Summary</string>
+    <string name="symptom_tracker_doctor_report">Doctor Summary Report</string>
+    <string name="symptom_tracker_copy_summary">Copy Summary</string>
+    <string name="symptom_tracker_copied_toast">Copied summary to clipboard!</string>
+    <string name="symptom_tracker_no_symptoms">No symptoms logged yet</string>
+    <string name="symptom_tracker_no_active">No active symptoms</string>
+    <string name="symptom_tracker_no_urgent">No high severity or urgent alerts</string>
+    <string name="symptom_tracker_no_resolved">No resolved symptoms</string>
+    <string name="symptom_tracker_empty_hint">Use the \"Log Symptom\" button to track changes.</string>
+    <string name="symptom_tracker_log_new">Log New Symptom</string>
+    <string name="symptom_tracker_edit_entry">Edit Symptom Entry</string>
+    <string name="symptom_tracker_quick_preset">Quick Select Preset:</string>
+    <string name="symptom_tracker_name_label">Symptom Name</string>
+    <string name="symptom_tracker_severity_label">Severity Intensity:</string>
+    <string name="symptom_tracker_frequency_label">Frequency:</string>
+    <string name="symptom_tracker_triggers_label">Triggers (e.g. cold air, stairs)</string>
+    <string name="symptom_tracker_notes_label">Notes for Doctor</string>
+    <string name="symptom_tracker_save_entry">Save Entry</string>
+    <string name="symptom_tracker_mark_active">Mark as Active</string>
+    <string name="symptom_tracker_mark_resolved">Mark as Resolved</string>
+    <string name="symptom_tracker_delete_log">Delete Log</string>
+</resources>
