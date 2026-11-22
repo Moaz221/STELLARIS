@@ -12,6 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.presentation.components.LungCareCard
 import com.example.myapplication.presentation.components.LungCareTag
+import com.example.myapplication.presentation.home.homePalette
 
 data class QuestionItem(
     val id: String,
@@ -31,6 +34,7 @@ data class QuestionItem(
 fun DoctorQuestionsScreen(
     onBack: () -> Unit = {}
 ) {
+    val p = homePalette()
     var questionsList by remember {
         mutableStateOf(
             listOf(
@@ -44,12 +48,23 @@ fun DoctorQuestionsScreen(
     var showDialog by remember { mutableStateOf(false) }
     var newQuestionText by remember { mutableStateOf("") }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .background(p.background)
+            .background(
+                Brush.verticalGradient(
+                    0f to p.bgGlow.copy(alpha = 0.45f),
+                    0.35f to p.bgGlowSecondary.copy(alpha = 0.20f),
+                    0.75f to Color.Transparent
+                )
+            )
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 20.dp)
+        ) {
         // Header
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -179,4 +194,5 @@ fun DoctorQuestionsScreen(
             }
         )
     }
+}
 }

@@ -1,8 +1,11 @@
 package com.example.myapplication.presentation.navigation
 
+import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -33,6 +36,17 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 private const val NAVIGATION_LOG_TAG = "StellarisNavigation"
+
+private fun findActivityResultRegistryOwner(context: android.content.Context): ActivityResultRegistryOwner? {
+    var ctx = context
+    while (ctx is ContextWrapper) {
+        if (ctx is ActivityResultRegistryOwner) {
+            return ctx
+        }
+        ctx = ctx.baseContext
+    }
+    return ctx as? ActivityResultRegistryOwner
+}
 
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
@@ -85,10 +99,20 @@ fun StellarisNavGraph() {
         context.createConfigurationContext(localizedConfig)
     }
 
-    CompositionLocalProvider(
-        LocalConfiguration provides localizedConfig,
-        LocalContext provides localizedContext
-    ) {
+    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
+        ?: remember(context) { findActivityResultRegistryOwner(context) }
+
+    val providers = remember(localizedConfig, localizedContext, activityResultRegistryOwner) {
+        buildList {
+            add(LocalConfiguration provides localizedConfig)
+            add(LocalContext provides localizedContext)
+            if (activityResultRegistryOwner != null) {
+                add(LocalActivityResultRegistryOwner provides activityResultRegistryOwner)
+            }
+        }.toTypedArray()
+    }
+
+    CompositionLocalProvider(*providers) {
         MyApplicationTheme(darkTheme = isDarkTheme) {
             NavHost(
                 navController = navController,

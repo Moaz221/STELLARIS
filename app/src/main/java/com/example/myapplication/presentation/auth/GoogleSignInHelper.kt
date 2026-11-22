@@ -2,13 +2,17 @@ package com.example.myapplication.presentation.auth
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.util.Log
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -27,8 +31,19 @@ fun getDefaultWebClientId(context: Context): String? {
     return if (resId != 0) context.getString(resId) else null
 }
 
+private fun Context.findActivityResultRegistryOwner(): ActivityResultRegistryOwner? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is ActivityResultRegistryOwner) {
+            return ctx
+        }
+        ctx = ctx.baseContext
+    }
+    return ctx as? ActivityResultRegistryOwner
+}
+
 @Composable
-fun rememberGoogleSignInLauncher(
+private fun rememberGoogleSignInLauncherInternal(
     onSuccess: (idToken: String) -> Unit,
     onError: (String) -> Unit,
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
@@ -63,11 +78,39 @@ fun rememberGoogleSignInLauncher(
     }
 }
 
+@Composable
+fun rememberGoogleSignInLauncher(
+    onSuccess: (idToken: String) -> Unit,
+    onError: (String) -> Unit,
+): ManagedActivityResultLauncher<Intent, ActivityResult>? {
+    val context = LocalContext.current
+    val owner = LocalActivityResultRegistryOwner.current
+        ?: context.findActivityResultRegistryOwner()
+
+    return if (owner != null) {
+        if (LocalActivityResultRegistryOwner.current == null) {
+            var launcher: ManagedActivityResultLauncher<Intent, ActivityResult>? = null
+            CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
+                launcher = rememberGoogleSignInLauncherInternal(onSuccess, onError)
+            }
+            launcher
+        } else {
+            rememberGoogleSignInLauncherInternal(onSuccess, onError)
+        }
+    } else {
+        null
+    }
+}
+
 fun launchGoogleSignInIntent(
     context: Context,
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>?,
     onError: (String) -> Unit,
 ) {
+    if (launcher == null) {
+        onError("Google Sign-In launcher is not available in the current context.")
+        return
+    }
     val webClientId = getDefaultWebClientId(context)
     if (webClientId.isNullOrBlank()) {
         onError("Google Sign-In is not configured in google-services.json.")
