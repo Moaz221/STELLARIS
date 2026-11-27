@@ -18,7 +18,7 @@ sealed interface CareJourneyUiState {
     data class Content(val data: CareJourneyState) : CareJourneyUiState
 }
 
-class CareJourneyViewModel(
+class CareJourneyViewModel @JvmOverloads constructor(
     private val repository: CareRepository = FakeCareRepository(),
     val journey: JourneyType = JourneyType.DIAGNOSED
 ) : ViewModel() {

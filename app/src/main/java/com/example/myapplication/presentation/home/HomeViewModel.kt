@@ -22,7 +22,7 @@ data class HomeUiState(
     val isLoading: Boolean = true
 )
 
-class HomeViewModel(
+class HomeViewModel @JvmOverloads constructor(
     private val healthRepository: HealthRepository = LocalHealthRepository(),
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ViewModel() {

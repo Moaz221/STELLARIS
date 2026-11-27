@@ -212,22 +212,32 @@ fun StellarisNavGraph() {
                 }
 
                 composable(Screen.Login.route) {
-                    LoginScreen(
-                        onLoginSuccess = {
-                            navController.navigateFrom(
-                                source = Screen.Login,
-                                destination = Screen.Home,
-                                clearBackStack = true
-                            )
-                        },
+                    val loginContent: @Composable () -> Unit = {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                navController.navigateFrom(
+                                    source = Screen.Login,
+                                    destination = Screen.Home,
+                                    clearBackStack = true
+                                )
+                            },
+                            onNavigateToSignUp = {
+                                navController.navigateFrom(
+                                    source = Screen.Login,
+                                    destination = Screen.SignUp
+                                )
+                            }
+                        )
+                    }
 
-                        onNavigateToSignUp = {
-                            navController.navigateFrom(
-                                source = Screen.Login,
-                                destination = Screen.SignUp
-                            )
-                        }
-                    )
+                    if (activityResultRegistryOwner != null) {
+                        CompositionLocalProvider(
+                            LocalActivityResultRegistryOwner provides activityResultRegistryOwner,
+                            content = loginContent
+                        )
+                    } else {
+                        loginContent()
+                    }
                 }
 
                 composable(Screen.SignUp.route) {

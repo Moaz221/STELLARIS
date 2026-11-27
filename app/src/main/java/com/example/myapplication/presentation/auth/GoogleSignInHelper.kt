@@ -12,7 +12,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -31,7 +30,7 @@ fun getDefaultWebClientId(context: Context): String? {
     return if (resId != 0) context.getString(resId) else null
 }
 
-private fun Context.findActivityResultRegistryOwner(): ActivityResultRegistryOwner? {
+fun Context.findActivityResultRegistryOwner(): ActivityResultRegistryOwner? {
     var ctx = this
     while (ctx is ContextWrapper) {
         if (ctx is ActivityResultRegistryOwner) {
@@ -40,42 +39,6 @@ private fun Context.findActivityResultRegistryOwner(): ActivityResultRegistryOwn
         ctx = ctx.baseContext
     }
     return ctx as? ActivityResultRegistryOwner
-}
-
-@Composable
-private fun rememberGoogleSignInLauncherInternal(
-    onSuccess: (idToken: String) -> Unit,
-    onError: (String) -> Unit,
-): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    return rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            val idToken = account?.idToken
-            if (!idToken.isNullOrBlank()) {
-                onSuccess(idToken)
-            } else {
-                onError("Failed to retrieve ID token from Google account.")
-            }
-        } catch (e: ApiException) {
-            Log.e("GoogleSignIn", "Google Sign In ApiException code: ${e.statusCode}", e)
-            val detailedError = when (e.statusCode) {
-                10 -> "DEVELOPER_ERROR (10): SHA-1/SHA-256 fingerprint missing in Firebase Console, or package name mismatch."
-                12500 -> "SIGN_IN_FAILED (12500): OAuth consent screen not configured in Google Cloud Console or Google Play Services needs update."
-                12501 -> "Sign in was cancelled."
-                7 -> "NETWORK_ERROR (7): Please check your internet connection."
-                else -> "Google Sign-In failed (Code ${e.statusCode}): ${e.message}"
-            }
-            if (e.statusCode != 12501) {
-                onError(detailedError)
-            }
-        } catch (e: Exception) {
-            Log.e("GoogleSignIn", "Google Sign In unexpected error", e)
-            onError(e.message ?: "Google sign in failed")
-        }
-    }
 }
 
 @Composable
@@ -88,14 +51,34 @@ fun rememberGoogleSignInLauncher(
         ?: context.findActivityResultRegistryOwner()
 
     return if (owner != null) {
-        if (LocalActivityResultRegistryOwner.current == null) {
-            var launcher: ManagedActivityResultLauncher<Intent, ActivityResult>? = null
-            CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
-                launcher = rememberGoogleSignInLauncherInternal(onSuccess, onError)
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+                if (!idToken.isNullOrBlank()) {
+                    onSuccess(idToken)
+                } else {
+                    onError("Failed to retrieve ID token from Google account.")
+                }
+            } catch (e: ApiException) {
+                Log.e("GoogleSignIn", "Google Sign In ApiException code: ${e.statusCode}", e)
+                val detailedError = when (e.statusCode) {
+                    10 -> "DEVELOPER_ERROR (10): SHA-1/SHA-256 fingerprint missing in Firebase Console, or package name mismatch."
+                    12500 -> "SIGN_IN_FAILED (12500): OAuth consent screen not configured in Google Cloud Console or Google Play Services needs update."
+                    12501 -> "Sign in was cancelled."
+                    7 -> "NETWORK_ERROR (7): Please check your internet connection."
+                    else -> "Google Sign-In failed (Code ${e.statusCode}): ${e.message}"
+                }
+                if (e.statusCode != 12501) {
+                    onError(detailedError)
+                }
+            } catch (e: Exception) {
+                Log.e("GoogleSignIn", "Google Sign In unexpected error", e)
+                onError(e.message ?: "Google sign in failed")
             }
-            launcher
-        } else {
-            rememberGoogleSignInLauncherInternal(onSuccess, onError)
         }
     } else {
         null

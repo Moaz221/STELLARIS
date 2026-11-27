@@ -1,155 +1,314 @@
 package com.example.myapplication.presentation.assistant
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.data.assistant.AssistantRepository
 import com.example.myapplication.data.assistant.AssistantRepositoryImpl
 import com.example.myapplication.data.assistant.FailureKind
 import com.example.myapplication.data.assistant.NetworkResult
+import com.example.myapplication.data.local.chat.ChatDatabase
+import com.example.myapplication.data.local.chat.ChatHistoryRepository
+import com.example.myapplication.data.local.chat.MessageEntity
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.coroutines.withContext
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 data class ChatMessage(
-    val id: String = UUID.randomUUID().toString(),   // ⬅️ بيتولّد تلقائياً — مش محتاجين id من السيرفر
+    val id: String = UUID.randomUUID().toString(),
+    /** فاضي لو [isEmergency]: الواجهة بتعرض نص الطوارئ المترجم من strings.xml. */
     val text: String,
     val isUser: Boolean,
-    val timestamp: String,
+    /** epoch millis. التنسيق بيتم في الـ UI حسب لغة التطبيق. */
+    val timestamp: Long,
     val isEmergency: Boolean = false
 )
 
+/** أخطاء بدل الـ strings الجاهزة، والـ UI هو اللي بيترجمها. */
+sealed interface ChatError {
+    data class Server(val code: String, val message: String) : ChatError
+    data class Network(val kind: FailureKind, val technicalDetail: String?) : ChatError
+
+    /** آخر رسالة في المحادثة المحفوظة مالهاش رد (التطبيق اتقفل أو المحادثة اتقفلت قبل الرد). */
+    data object Interrupted : ChatError
+}
+
 data class AssistantUiState(
+    val conversationId: String = UUID.randomUUID().toString(),
+    val serverConversationId: String? = null,
     val messages: List<ChatMessage> = emptyList(),
-    val inputText: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val failureKind: FailureKind? = null,
-    val conversationId: String? = null,
+    val isRestoring: Boolean = false,
+    val error: ChatError? = null,
     val showEmergencyAlert: Boolean = false
 )
 
 class AssistantViewModel(
-    private val repository: AssistantRepository = AssistantRepositoryImpl()
+    private val history: ChatHistoryRepository,
+    private val assistantRepository: AssistantRepository = AssistantRepositoryImpl()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AssistantUiState())
     val uiState: StateFlow<AssistantUiState> = _uiState.asStateFlow()
 
-    init {
-        // رسالة ترحيبية أولية افتراضية
-        _uiState.update { current ->
-            current.copy(
-                messages = listOf(
-                    ChatMessage(
-                        text = "مرحباً بك! أنا مساعد LungCare الذكي للتعليم الصحي. كيف يمكنني مساعدتك اليوم بخصوص صحة الرئة أو التحضير لزيارة الطبيب؟",
-                        isUser = false,
-                        timestamp = getCurrentTime()
-                    )
-                )
+    /** طلب شغّال لكل محادثة. الطلب بيكمل ويتحفظ حتى لو المستخدم فتح محادثة تانية. */
+    private val requests = ConcurrentHashMap<String, Job>()
+    private var loadJob: Job? = null
+
+    // ───────────────────────── الإرسال ─────────────────────────
+
+    fun sendMessage(text: String) {
+        val clean = text.trim()
+        val state = _uiState.value
+        if (clean.isEmpty() || state.isLoading || state.isRestoring) return
+
+        val conversationId = state.conversationId
+        val userMessage = newMessage(text = clean, isUser = true)
+
+        // فحص الطوارئ في مكان واحد، ومبنبعتش للسيرفر (زي السلوك الأصلي)
+        if (MedicalSafetyGuard.containsEmergencySymptoms(clean)) {
+            val emergency = newMessage(
+                text = "",
+                isUser = false,
+                isEmergency = true,
+                timestamp = userMessage.timestamp + 1
             )
+            _uiState.update {
+                it.copy(
+                    messages = it.messages + userMessage + emergency,
+                    error = null,
+                    showEmergencyAlert = true
+                )
+            }
+            persist(conversationId, listOf(userMessage, emergency))
+            return
+        }
+
+        _uiState.update {
+            it.copy(messages = it.messages + userMessage, isLoading = true, error = null)
+        }
+        persist(conversationId, listOf(userMessage))
+        requestReply(conversationId, clean, state.serverConversationId)
+    }
+
+    /**
+     * بيعيد الطلب لآخر رسالة مستخدم من غير ما يضيفها تاني في القائمة
+     * (الـ retry القديم كان بيكرر الرسالة).
+     */
+    fun retry() {
+        val state = _uiState.value
+        if (state.isLoading || state.isRestoring) return
+        val lastUserMessage = state.messages.lastOrNull()?.takeIf { it.isUser } ?: return
+
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        requestReply(state.conversationId, lastUserMessage.text, state.serverConversationId)
+    }
+
+    private fun requestReply(
+        conversationId: String,
+        prompt: String,
+        serverConversationId: String?
+    ) {
+        val job = viewModelScope.launch {
+            var reply: ChatMessage? = null
+            var newServerId: String? = null
+            var error: ChatError? = null
+
+            try {
+                when (val result = assistantRepository.sendMessage(prompt, serverConversationId)) {
+                    is NetworkResult.Success -> {
+                        reply = newMessage(text = result.data.response, isUser = false)
+                        newServerId = result.data.conversationId
+                    }
+
+                    is NetworkResult.Error -> {
+                        error = ChatError.Server(
+                            code = result.code.toString(),
+                            message = result.message.toString()
+                        )
+                    }
+
+                    is NetworkResult.Failure -> {
+                        error = ChatError.Network(result.kind, result.technicalDetail)
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Assistant request failed", e)
+                error = ChatError.Network(FailureKind.UNKNOWN, e.message)
+            }
+
+            ensureActive()
+
+            val aiMessage = reply
+            val serverId = newServerId
+            val failure = error
+
+            // بنحفظ الرد في المحادثة اللي طلبته حتى لو المستخدم انتقل لغيرها
+            if (aiMessage != null) {
+                persist(conversationId, listOf(aiMessage), serverConversationId = serverId)
+            }
+
+            // وبنحدّث الشاشة بس لو لسه على نفس المحادثة
+            _uiState.update { current ->
+                if (current.conversationId != conversationId) {
+                    current
+                } else {
+                    current.copy(
+                        messages = if (aiMessage != null) current.messages + aiMessage else current.messages,
+                        serverConversationId = serverId ?: current.serverConversationId,
+                        isLoading = false,
+                        error = failure
+                    )
+                }
+            }
+        }
+
+        requests[conversationId] = job
+        job.invokeOnCompletion { requests.remove(conversationId) }
+    }
+
+    // ───────────────────────── المحادثات ─────────────────────────
+
+    fun startNewConversation() {
+        loadJob?.cancel()
+        _uiState.value = AssistantUiState()
+    }
+
+    fun openConversation(id: String) {
+        if (_uiState.value.conversationId == id) return
+
+        loadJob?.cancel()
+        _uiState.value = AssistantUiState(conversationId = id, isRestoring = true)
+
+        loadJob = viewModelScope.launch {
+            val stored = try {
+                history.loadConversation(id)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load conversation $id", e)
+                null
+            }
+
+            if (stored == null) {
+                _uiState.value = AssistantUiState()
+                return@launch
+            }
+
+            val messages = stored.messages.map { it.toChatMessage() }
+            val waitingForReply = requests.containsKey(id)
+            val unanswered = !waitingForReply && messages.lastOrNull()?.isUser == true
+
+            _uiState.update { current ->
+                if (current.conversationId != id) {
+                    current
+                } else {
+                    current.copy(
+                        serverConversationId = stored.conversation.serverConversationId,
+                        messages = messages,
+                        isRestoring = false,
+                        isLoading = waitingForReply,
+                        error = if (unanswered) ChatError.Interrupted else null
+                    )
+                }
+            }
         }
     }
 
-    fun onInputTextChanged(newText: String) {
-        _uiState.update { it.copy(inputText = newText) }
+    /** بتتندهي بعد ما شاشة الـ History تمسح محادثة. */
+    fun onConversationDeleted(id: String) {
+        requests.remove(id)?.cancel()
+        if (_uiState.value.conversationId == id) startNewConversation()
+    }
+
+    fun onAllConversationsDeleted() {
+        requests.values.forEach { it.cancel() }
+        requests.clear()
+        startNewConversation()
     }
 
     fun dismissEmergencyAlert() {
         _uiState.update { it.copy(showEmergencyAlert = false) }
     }
 
-    fun retry() {
-        val lastUserText = _uiState.value.messages.lastOrNull { it.isUser }?.text
-        if (!lastUserText.isNullOrBlank()) {
-            sendMessage(lastUserText)
-        }
-    }
+    // ───────────────────────── التخزين ─────────────────────────
 
-    fun sendMessage(promptText: String? = null) {
-        val textToSend = (promptText ?: _uiState.value.inputText).trim()
-        if (textToSend.isBlank() || _uiState.value.isLoading) return
+    private fun persist(
+        conversationId: String,
+        messages: List<ChatMessage>,
+        serverConversationId: String? = null
+    ) {
+        val titleHint = messages.firstOrNull { it.isUser }?.text
+        val entities = messages.map { it.toEntity(conversationId) }
 
-        val userMessage = ChatMessage(
-            text = textToSend,
-            isUser = true,
-            timestamp = getCurrentTime()
-        )
-
-        // 1. فحص الأمان الطبي للأعراض الطارئة
-        if (MedicalSafetyGuard.containsEmergencySymptoms(textToSend)) {
-            val emergencyMessage = ChatMessage(
-                text = "⚠️ تنبيه طبي عاجل: الأعراض التي ذكرتها (مثل خروج دم أو صعوبة تنفس حادة) تتطلب تقييماً طبياً فورياً أو التوجه لأقرب طوارئ، ولا يجب الاعتماد على المساعد الذكي.",
-                isUser = false,
-                timestamp = getCurrentTime(),
-                isEmergency = true
-            )
-            _uiState.update { current ->
-                current.copy(
-                    messages = current.messages + userMessage + emergencyMessage,
-                    inputText = "",
-                    showEmergencyAlert = true
-                )
-            }
-            return
-        }
-
-        // 2. تحديث الشاشة برسالة المستخدم وبدء التحميل
-        _uiState.update { current ->
-            current.copy(
-                messages = current.messages + userMessage,
-                inputText = "",
-                isLoading = true,
-                errorMessage = null,
-                failureKind = null
-            )
-        }
-
-        // 3. استدعاء السيرفر الحقيقي
         viewModelScope.launch {
-            when (val result = repository.sendMessage(textToSend, _uiState.value.conversationId)) {
-                is NetworkResult.Success -> {
-                    val aiMessage = ChatMessage(
-                        // ✅ الإصلاح: شلنا result.data.id خالص — UUID بيتولّد تلقائياً فوق
-                        text = result.data.response,
-                        isUser = false,
-                        timestamp = getCurrentTime()
-                    )
-                    _uiState.update { current ->
-                        current.copy(
-                            messages = current.messages + aiMessage,
-                            conversationId = result.data.conversationId ?: current.conversationId,
-                            isLoading = false
-                        )
-                    }
+            try {
+                // NonCancellable عشان الكتابة ما تتقطعش لو الـ ViewModel اتقفل في نصها
+                withContext(NonCancellable) {
+                    history.appendMessages(conversationId, entities, titleHint, serverConversationId)
                 }
-                is NetworkResult.Error -> {
-                    _uiState.update { current ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = "Error (${result.code}): ${result.message}"
-                        )
-                    }
-                }
-                is NetworkResult.Failure -> {
-                    _uiState.update { current ->
-                        current.copy(
-                            isLoading = false,
-                            failureKind = result.kind,
-                            errorMessage = result.technicalDetail
-                        )
-                    }
-                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save messages", e)
             }
         }
     }
 
-    private fun getCurrentTime(): String {
-        return SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
+    private fun newMessage(
+        text: String,
+        isUser: Boolean,
+        isEmergency: Boolean = false,
+        timestamp: Long = System.currentTimeMillis()
+    ) = ChatMessage(
+        text = text,
+        isUser = isUser,
+        timestamp = timestamp,
+        isEmergency = isEmergency
+    )
+
+    companion object {
+        private const val TAG = "AssistantViewModel"
+
+        fun factory(context: Context): ViewModelProvider.Factory {
+            val appContext = context.applicationContext
+            return viewModelFactory {
+                initializer {
+                    AssistantViewModel(ChatHistoryRepository(ChatDatabase.get(appContext)))
+                }
+            }
+        }
     }
 }
+
+private fun ChatMessage.toEntity(conversationId: String) = MessageEntity(
+    id = id,
+    conversationId = conversationId,
+    text = text,
+    isUser = isUser,
+    timestamp = timestamp,
+    isEmergency = isEmergency
+)
+
+private fun MessageEntity.toChatMessage() = ChatMessage(
+    id = id,
+    text = text,
+    isUser = isUser,
+    timestamp = timestamp,
+    isEmergency = isEmergency
+)

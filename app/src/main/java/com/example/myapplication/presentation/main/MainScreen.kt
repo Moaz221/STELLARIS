@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
-import com.example.myapplication.presentation.assistant.AssistantScreen
+import com.example.myapplication.presentation.assistant.AssistantFlow
 import com.example.myapplication.presentation.care.CareJourneyScreen
 import com.example.myapplication.presentation.design.DesignSystemPreviewScreen
 import com.example.myapplication.presentation.symptoms.SymptomTrackerScreen
@@ -74,6 +74,10 @@ sealed class MainTab(
         icon = Icons.Default.Favorite
     )
 
+    /**
+     * تاب المساعد بيفضل في الـ Bottom Bar، بس الضغط عليه مبيغيّرش التاب:
+     * بيفتح شاشة الشات كـ Overlay كاملة من غير الـ Navbar (OverlayScreen.ASSISTANT).
+     */
     data object Assistant : MainTab(
         index = 2,
         titleRes = R.string.nav_assistant,
@@ -100,7 +104,8 @@ enum class OverlayScreen {
     DOCTOR_QUESTIONS,
     EDUCATION_HUB,
     DESIGN_SYSTEM_PREVIEW,
-    SYMPTOMS_TRACKER
+    SYMPTOMS_TRACKER,
+    ASSISTANT
 }
 
 private val mainTabs = listOf(
@@ -166,7 +171,13 @@ fun MainScreen(
                     com.example.myapplication.presentation.home.GlowBottomBar(
                         selectedIndex = selectedTabIndex,
                         onSelect = { index ->
-                            selectedTabIndex = index
+                            if (index == MainTab.Assistant.index) {
+                                // الشات شاشة كاملة من غير Navbar، والتاب الحالي يفضل زي ما هو
+                                // عشان الرجوع يودّي المستخدم لنفس المكان.
+                                openOverlay(OverlayScreen.ASSISTANT)
+                            } else {
+                                selectedTabIndex = index
+                            }
                         }
                     )
                 }
@@ -368,9 +379,8 @@ private fun MainTabContent(
             )
         }
 
-        MainTab.Assistant -> {
-            AssistantScreen()
-        }
+        // مبيتعرضش هنا: الضغط على التاب بيفتح OverlayScreen.ASSISTANT بدل ما يغيّر التاب
+        MainTab.Assistant -> Unit
 
         MainTab.Care -> {
             CareJourneyScreen()
@@ -416,6 +426,10 @@ private fun OverlayContent(
 
         OverlayScreen.SYMPTOMS_TRACKER -> {
             SymptomTrackerScreen(onBack = onBack)
+        }
+
+        OverlayScreen.ASSISTANT -> {
+            AssistantFlow(onBack = onBack)
         }
 
         OverlayScreen.NONE -> Unit

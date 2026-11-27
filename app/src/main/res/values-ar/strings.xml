@@ -106,7 +106,24 @@
     <string name="home_article_records_body">احفظ نسخك الرقمية من التقارير في حسابك لسهولة الوصول إليها أثناء زيارة الطبيب.</string>
 
     <!-- Vision Lab Card -->
-    <string name="vision_lab_title">معمل الرؤية الحاسوبية</string>
+    <string name="vision_lab_title">مختبر الأشعة الذكي</string>
+    <string name="vision_lab_subtitle">تحليل صور بالذكاء الاصطناعي (تعليمي)</string>
+    <string name="vision_disclaimer">هذه الأداة تستخدم الذكاء الاصطناعي لتحديد مناطق الاهتمام في الأشعة السينية. لا تُشخّص السرطان أو أي مرض. استشر دائماً أخصائي أشعة مؤهل.</string>
+    <string name="capture_or_select">التقط أو اختر أشعة سينية للصدر</string>
+    <string name="tap_to_analyze">اضغط "تحليل" لتشغيل تقييم الذكاء الاصطناعي</string>
+    <string name="analyzing">جاري تحليل الصورة…</string>
+    <string name="analyzing_hint">قد يستغرق حتى 60 ثانية على المعالج</string>
+    <string name="pick_photo">اختر صورة</string>
+    <string name="analyze">تحليل</string>
+    <string name="analysis_results">نتائج تحليل الذكاء الاصطناعي</string>
+    <string name="gradcam_title">خريطة الانتباه (Grad-CAM)</string>
+    <string name="gradcam_subtitle">يوضح المناطق التي ركز عليها الذكاء الاصطناعي — ليس تشخيصاً</string>
+    <string name="segmentation_title">تقسيم الرئتين</string>
+    <string name="segmentation_subtitle">حدود الرئة المكتشفة بالذكاء الاصطناعي — للمراجعة التعليمية فقط</string>
+    <string name="ai_not_diagnosis">⚠️ مخرجات تعليمية مولّدة بالذكاء الاصطناعي — ليست تشخيصاً طبياً. شارك هذه الصور مع طبيبك للتفسير المهني.</string>
+    <string name="image_decode_error">تعذر عرض الصورة</string>
+    <string name="try_again">إعادة المحاولة</string>
+    <string name="back">رجوع</string>
     <string name="vision_lab_desc">التقاط أو رفع أشعة سينية للصدر لتقييم الجودة بالذكاء الاصطناعي (تجريبي)</string>
     <string name="vision_lab_btn">فتح معمل الرؤية</string>
     <string name="vision_engine_ready">محرك تحليل الأشعة السينية • جاهز</string>
@@ -146,7 +163,43 @@
     <string name="assistant_dismiss">إغلاق</string>
     <string name="assistant_scroll_bottom">الانتقال لآخر رسالة</string>
     <string name="assistant_urgent_title">قد تحتاج رعاية عاجلة</string>
-    <string name="assistant_urgent_body">إذا كنت تعاني من صعوبة شديدة في التنفس أو ألم شديد في الصدر أو سعال مصحوب بدم، اتصل بالطوارئ أو توجّه لأقرب رعاية طبية عاجلة الآن. لا تنتظر الرد هنا.</string>>
+    <string name="assistant_urgent_body">إذا كنت تعاني من صعوبة شديدة في التنفس أو ألم شديد في الصدر أو سعال مصحوب بدم، اتصل بالطوارئ أو توجّه لأقرب رعاية طبية عاجلة الآن. لا تنتظر الرد هنا.</string>
+
+    <!-- Assistant screen -->
+    <string name="chat_back">رجوع</string>
+    <string name="chat_history">سجل المحادثات</string>
+    <string name="chat_new_chat">محادثة جديدة</string>
+    <string name="chat_default_user_name">يا صديقي</string>
+    <string name="chat_loading_conversation">جاري تحميل المحادثة</string>
+    <string name="chat_emergency_message">⚠️ تنبيه طبي عاجل: الأعراض التي ذكرتها (مثل خروج دم أو صعوبة تنفس حادة) تتطلب تقييماً طبياً فورياً أو التوجه لأقرب طوارئ، ولا يجب الاعتماد على المساعد الذكي.</string>
+    <string name="chat_error_server">خطأ (%1$s): %2$s</string>
+    <string name="chat_error_interrupted">لم يصل رد على هذه الرسالة.</string>
+
+    <!-- History screen -->
+    <string name="chat_history_title">سجل المحادثات</string>
+    <string name="chat_history_local_note">محفوظ على هذا الجهاز فقط</string>
+    <string name="chat_history_empty_title">لا توجد محادثات بعد</string>
+    <string name="chat_history_empty_body">ستظهر هنا محادثاتك مع المساعد. وهي محفوظة على هذا الجهاز فقط.</string>
+    <string name="chat_history_new_chat">محادثة جديدة</string>
+    <string name="chat_history_untitled">محادثة جديدة</string>
+    <string name="chat_history_current">الحالية</string>
+    <string name="chat_history_delete">حذف المحادثة</string>
+    <string name="chat_history_delete_all">حذف كل المحادثات</string>
+    <string name="chat_history_delete_title">حذف هذه المحادثة؟</string>
+    <string name="chat_history_delete_body">سيتم حذف هذه المحادثة نهائياً من هذا الجهاز.</string>
+    <string name="chat_history_delete_all_title">حذف كل المحادثات؟</string>
+    <string name="chat_history_delete_all_body">سيتم حذف جميع المحادثات المحفوظة نهائياً من هذا الجهاز، ولا يمكن التراجع عن ذلك.</string>
+    <string name="chat_history_confirm_delete">حذف</string>
+    <string name="chat_history_cancel">إلغاء</string>
+
+    <plurals name="chat_history_message_count">
+        <item quantity="zero">%d رسالة</item>
+        <item quantity="one">رسالة واحدة</item>
+        <item quantity="two">رسالتان</item>
+        <item quantity="few">%d رسائل</item>
+        <item quantity="many">%d رسالة</item>
+        <item quantity="other">%d رسالة</item>
+    </plurals>
 
     <!-- Care Journey -->
     <string name="care_title">رحلتي العلاجية</string>
@@ -364,6 +417,8 @@
     <string name="error_timeout">استغرق السيرفر وقتاً طويلاً للرد. يرجى إعادة المحاولة.</string>
     <string name="error_secure_connection">تعذر إنشاء اتصال آمن.</string>
     <string name="error_generic">حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_server">خطأ في الخادم. أعد المحاولة.</string>
+    <string name="error_network">خطأ في الشبكة. تحقق من اتصالك.</string>
     <string name="retry">إعادة المحاولة</string>
 
     <!-- Profile Screen Strings -->

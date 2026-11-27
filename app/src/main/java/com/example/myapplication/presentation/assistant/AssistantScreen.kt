@@ -25,20 +25,39 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
@@ -49,31 +68,56 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.HealthAndSafety
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.QuestionAnswer
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withStyle
@@ -83,12 +127,15 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.assistant.FailureKind
+import com.example.myapplication.presentation.home.homePalette
 import com.example.myapplication.presentation.theme.MyApplicationTheme
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private val OnlineGreen = Color(0xFF22C55E)
 
 private fun FailureKind.toMessageRes(): Int = when (this) {
     FailureKind.NO_INTERNET, FailureKind.HOST_UNREACHABLE -> R.string.error_offline
@@ -98,81 +145,97 @@ private fun FailureKind.toMessageRes(): Int = when (this) {
     FailureKind.UNKNOWN -> R.string.error_generic
 }
 
-/* ───────────────────────── الربط بالـ ViewModel ───────────────────────── */
 @Composable
-fun AssistantScreen(viewModel: AssistantViewModel = viewModel()) {
+private fun ChatError.asText(): String = when (this) {
+    is ChatError.Server -> stringResource(R.string.chat_error_server, code, message)
+    is ChatError.Network -> stringResource(kind.toMessageRes())
+    ChatError.Interrupted -> stringResource(R.string.chat_error_interrupted)
+}
+
+/* ───────────────────────── الربط بالـ ViewModel ───────────────────────── */
+
+/**
+ * الـ draft (النص اللي المستخدم بيكتبه) متشال فوق في AssistantFlow عشان ما يضيعش
+ * لما المستخدم يفتح شاشة الـ History ويرجع.
+ */
+@Composable
+fun AssistantScreen(
+    viewModel: AssistantViewModel,
+    input: String,
+    onInputChange: (String) -> Unit,
+    onBack: () -> Unit,
+    onOpenHistory: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var localUrgentNotice by rememberSaveable { mutableStateOf(false) }
 
-    val showUrgentNotice = localUrgentNotice || state.showEmergencyAlert
-
-    val resolvedErrorMsg = if (state.failureKind != null) {
-        stringResource(state.failureKind!!.toMessageRes())
-    } else {
-        state.errorMessage
+    val fallbackName = stringResource(R.string.chat_default_user_name)
+    val userName = remember(fallbackName) {
+        FirebaseAuth.getInstance().currentUser?.displayName
+            ?.trim()
+            ?.substringBefore(' ')
+            ?.takeIf { it.isNotEmpty() }
+            ?: fallbackName
     }
 
     AssistantContent(
+        conversationId = state.conversationId,
         messages = state.messages,
         isAiTyping = state.isLoading,
-        errorMessage = resolvedErrorMsg,
-        showUrgentNotice = showUrgentNotice,
-        userName = "Moaz",
-        onSend = { text ->
-            if (UrgentInputDetector.isUrgent(text)) localUrgentNotice = true
-            viewModel.sendMessage(text)
-        },
+        isRestoring = state.isRestoring,
+        error = state.error,
+        showUrgentNotice = state.showEmergencyAlert,
+        userName = userName,
+        input = input,
+        onInputChange = onInputChange,
+        onSend = viewModel::sendMessage,
         onRetry = viewModel::retry,
-        onDismissUrgentNotice = {
-            localUrgentNotice = false
-            viewModel.dismissEmergencyAlert()
-        }
+        onDismissUrgentNotice = viewModel::dismissEmergencyAlert,
+        onBack = onBack,
+        onOpenHistory = onOpenHistory,
+        onNewChat = viewModel::startNewConversation,
+        modifier = modifier
     )
-}
-
-/** قائمة الكلمات العاجلة للتنبيه المباشر في الواجهة */
-internal object UrgentInputDetector {
-    private val phrases = listOf(
-        "coughing up blood", "coughing blood", "cough up blood",
-        "can't breathe", "cannot breathe", "severe chest pain",
-        "سعال دم", "بكح دم", "كحة بدم", "مش قادر اتنفس", "مش قادر أتنفس",
-        "لا أستطيع التنفس", "ألم شديد في الصدر", "الم شديد في الصدر"
-    )
-
-    fun isUrgent(text: String): Boolean {
-        val normalized = text.lowercase()
-        return phrases.any { it in normalized } || MedicalSafetyGuard.containsEmergencySymptoms(text)
-    }
 }
 
 /* ───────────────────────── الشاشة (Stateless) ───────────────────────── */
 
 @Composable
 fun AssistantContent(
+    conversationId: String,
     messages: List<ChatMessage>,
     isAiTyping: Boolean,
-    errorMessage: String?,
+    isRestoring: Boolean,
+    error: ChatError?,
     showUrgentNotice: Boolean,
     userName: String,
+    input: String,
+    onInputChange: (String) -> Unit,
     onSend: (String) -> Unit,
     onRetry: () -> Unit,
     onDismissUrgentNotice: () -> Unit,
+    onBack: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onNewChat: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val p = com.example.myapplication.presentation.home.homePalette()
+    val p = homePalette()
     val colors = MaterialTheme.colorScheme
-    var input by rememberSaveable { mutableStateOf("") }
     val hasConversation = messages.any { it.isUser }
+    val errorText = error?.asText()
 
-    val seenKeys = remember {
-        messages.indices.mapTo(mutableSetOf()) { messageKey(it, messages[it]) }
+    // الرسايل الموجودة وقت فتح المحادثة (أو بعد ما تخلّص تحميل) تتعتبر "اتشافت"
+    // فمتعملش animation ولا typewriter. بس الرسايل الجديدة هي اللي بتتحرك.
+    val seenKeys = remember(conversationId, isRestoring) {
+        messages.mapTo(mutableSetOf()) { it.id }
     }
 
+    val canSend = !isAiTyping && !isRestoring
     val submit: (String) -> Unit = { text ->
         val clean = text.trim()
-        if (clean.isNotEmpty() && !isAiTyping) {
+        if (clean.isNotEmpty() && canSend) {
             onSend(clean)
-            input = ""
+            onInputChange("")
         }
     }
 
@@ -180,18 +243,34 @@ fun AssistantContent(
         modifier = modifier
             .fillMaxSize()
             .background(p.background)
-            .background(
-                Brush.verticalGradient(
-                    0f to p.bgGlow.copy(alpha = 0.45f),
-                    0.35f to p.bgGlowSecondary.copy(alpha = 0.20f),
-                    0.75f to Color.Transparent
+            // توهّج هادي من فوق + توهّج ثانوي من تحت، بيدّي إحساس "عمق" طبي نضيف
+            .drawBehind {
+                drawRect(
+                    Brush.radialGradient(
+                        colors = listOf(p.bgGlow.copy(alpha = 0.50f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, 0f),
+                        radius = size.width * 1.1f
+                    )
                 )
-            )
+                drawRect(
+                    Brush.radialGradient(
+                        colors = listOf(p.bgGlowSecondary.copy(alpha = 0.28f), Color.Transparent),
+                        center = Offset(0f, size.height * 0.95f),
+                        radius = size.width * 1.0f
+                    )
+                )
+            }
             .statusBarsPadding()
             .navigationBarsPadding()
             .imePadding()
     ) {
-        AssistantHeader(isAiTyping = isAiTyping)
+        AssistantHeader(
+            isAiTyping = isAiTyping,
+            canStartNew = hasConversation,
+            onBack = onBack,
+            onOpenHistory = onOpenHistory,
+            onNewChat = onNewChat
+        )
 
         AnimatedVisibility(
             visible = showUrgentNotice,
@@ -207,86 +286,121 @@ fun AssistantContent(
                 .fillMaxWidth()
         ) {
             AnimatedContent(
-                targetState = hasConversation,
+                targetState = when {
+                    isRestoring -> BodyState.Restoring
+                    hasConversation -> BodyState.Conversation
+                    else -> BodyState.Welcome
+                },
                 transitionSpec = { fadeIn(tween(350)) togetherWith fadeOut(tween(200)) },
                 label = "assistantBody"
-            ) { started ->
-                if (started) {
-                    ConversationList(
+            ) { body ->
+                when (body) {
+                    BodyState.Restoring -> RestoringIndicator()
+                    BodyState.Conversation -> ConversationList(
                         messages = messages,
                         isAiTyping = isAiTyping,
-                        errorMessage = errorMessage,
+                        errorText = errorText,
                         seenKeys = seenKeys,
                         onRetry = onRetry
                     )
-                } else {
-                    WelcomeHero(userName = userName, onPromptClick = submit)
+
+                    BodyState.Welcome -> WelcomeHero(userName = userName, onPromptClick = submit)
                 }
             }
         }
 
         ChatInputBar(
             value = input,
-            onValueChange = { input = it },
+            onValueChange = onInputChange,
             isBusy = isAiTyping,
+            canSend = canSend && input.isNotBlank(),
             onSend = { submit(input) }
         )
     }
 }
 
-private fun messageKey(index: Int, message: ChatMessage) = "$index-${message.id}"
+private enum class BodyState { Restoring, Conversation, Welcome }
 
 @Composable
 private fun bubbleTextStyle(): TextStyle = MaterialTheme.typography.bodyMedium.copy(
-    fontSize = 14.sp,
-    lineHeight = 22.sp,
+    fontSize = 15.sp,
+    lineHeight = 24.sp,
     textDirection = TextDirection.Content
 )
+
+@Composable
+private fun RestoringIndicator() {
+    val label = stringResource(R.string.chat_loading_conversation)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 3.dp)
+    }
+}
 
 /* ───────────────────────── Header ───────────────────────── */
 
 @Composable
-private fun AssistantHeader(isAiTyping: Boolean) {
+private fun AssistantHeader(
+    isAiTyping: Boolean,
+    canStartNew: Boolean,
+    onBack: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onNewChat: () -> Unit
+) {
     val colors = MaterialTheme.colorScheme
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = colors.surface.copy(alpha = 0.95f),
-        tonalElevation = 2.dp,
-        border = BorderStroke(
-            width = 1.dp,
-            color = colors.outlineVariant.copy(alpha = 0.6f)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = colors.surface.copy(alpha = 0.88f)
         ) {
-            AiAvatar(size = 46.dp, pulsing = isAiTyping)
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.assistant_title),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.onSurface
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.chat_back),
+                        tint = colors.onSurface
+                    )
+                }
+
+                // أفاتار + نقطة حالة (أخضر = متصل)
+                Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
+                    AiAvatar(size = 40.dp, pulsing = isAiTyping)
                     Box(
-                        Modifier
-                            .size(8.dp)
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(13.dp)
+                            .background(colors.surface, CircleShape)
+                            .padding(2.dp)
                             .background(
-                                if (isAiTyping) colors.primary else colors.secondary,
+                                if (isAiTyping) colors.primary else OnlineGreen,
                                 CircleShape
                             )
                     )
-                    Spacer(Modifier.width(6.dp))
+                }
+
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.assistant_title),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onSurface,
+                        maxLines = 1
+                    )
                     AnimatedContent(
                         targetState = isAiTyping,
                         transitionSpec = {
                             fadeIn() + slideInVertically { it / 2 } togetherWith
-                                fadeOut() + slideOutVertically { -it / 2 }
+                                    fadeOut() + slideOutVertically { -it / 2 }
                         },
                         label = "assistantStatus"
                     ) { typing ->
@@ -301,8 +415,37 @@ private fun AssistantHeader(isAiTyping: Boolean) {
                         )
                     }
                 }
+                IconButton(onClick = onNewChat, enabled = canStartNew) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(R.string.chat_new_chat),
+                        tint = if (canStartNew) colors.onSurface else colors.onSurface.copy(alpha = 0.38f)
+                    )
+                }
+                IconButton(onClick = onOpenHistory) {
+                    Icon(
+                        imageVector = Icons.Outlined.History,
+                        contentDescription = stringResource(R.string.chat_history),
+                        tint = colors.onSurface
+                    )
+                }
             }
         }
+        // خط فاصل رفيع بتدرّج بدل البوردر الصلب
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            colors.primary.copy(alpha = 0.35f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
     }
 }
 
@@ -353,6 +496,57 @@ private fun AiAvatar(size: Dp, pulsing: Boolean = false) {
 
 /* ───────────────────────── Welcome ───────────────────────── */
 
+/** الأفاتار الكبير بحلقات نبض بتتوسّع حواليه، زي إشارة "مراقبة" طبية هادية. */
+@Composable
+private fun HeroOrb(size: Dp) {
+    val colors = MaterialTheme.colorScheme
+    val transition = rememberInfiniteTransition(label = "heroOrb")
+    val ring1 = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(3000), RepeatMode.Restart),
+        label = "ring1"
+    )
+    val ring2 = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(3000), RepeatMode.Restart, StartOffset(1500)),
+        label = "ring2"
+    )
+    val primary = colors.primary
+    val secondary = colors.secondary
+
+    Box(modifier = Modifier.size(size * 2f), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.matchParentSize()) {
+            val maxR = this.size.minDimension / 2f
+            // هالة ناعمة ثابتة
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(primary.copy(alpha = 0.22f), secondary.copy(alpha = 0.08f), Color.Transparent)
+                ),
+                radius = maxR
+            )
+            listOf(ring1.value, ring2.value).forEach { t ->
+                drawCircle(
+                    color = primary.copy(alpha = 0.35f * (1f - t)),
+                    radius = maxR * (0.50f + 0.50f * t),
+                    style = Stroke(width = 1.5.dp.toPx())
+                )
+            }
+        }
+        Box(
+            Modifier.shadow(
+                elevation = 18.dp,
+                shape = CircleShape,
+                ambientColor = primary,
+                spotColor = primary
+            )
+        ) {
+            AiAvatar(size = size)
+        }
+    }
+}
+
 @Composable
 private fun WelcomeHero(userName: String, onPromptClick: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
@@ -366,16 +560,17 @@ private fun WelcomeHero(userName: String, onPromptClick: (String) -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 24.dp),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AiAvatar(size = 80.dp, pulsing = true)
-        Spacer(Modifier.height(18.dp))
+        HeroOrb(size = 76.dp)
+        Spacer(Modifier.height(4.dp))
         Text(
             text = stringResource(R.string.assistant_welcome_title, userName),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp,
+            lineHeight = 32.sp,
+            fontWeight = FontWeight.ExtraBold,
             color = colors.onBackground,
             textAlign = TextAlign.Center
         )
@@ -385,15 +580,16 @@ private fun WelcomeHero(userName: String, onPromptClick: (String) -> Unit) {
             fontSize = 14.sp,
             lineHeight = 22.sp,
             color = colors.onSurfaceVariant,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(28.dp))
 
         prompts.forEachIndexed { index, (icon, text) ->
-            Entrance(animate = true, delayMillis = 120 + index * 90) {
+            Entrance(animate = true, delayMillis = 150 + index * 100) {
                 PromptCard(icon = icon, text = text, onClick = { onPromptClick(text) })
             }
-            if (index != prompts.lastIndex) Spacer(Modifier.height(10.dp))
+            if (index != prompts.lastIndex) Spacer(Modifier.height(12.dp))
         }
     }
 }
@@ -401,37 +597,60 @@ private fun WelcomeHero(userName: String, onPromptClick: (String) -> Unit) {
 @Composable
 private fun PromptCard(icon: ImageVector, text: String, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(20.dp)
     Surface(
         shape = shape,
         color = colors.surface,
-        border = BorderStroke(1.dp, colors.outlineVariant),
-        shadowElevation = 2.dp,
+        border = BorderStroke(
+            1.dp,
+            Brush.linearGradient(
+                listOf(
+                    colors.primary.copy(alpha = 0.35f),
+                    colors.outlineVariant.copy(alpha = 0.5f)
+                )
+            )
+        ),
+        shadowElevation = 3.dp,
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(38.dp)
-                    .background(colors.primary.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
+                    .size(44.dp)
+                    .background(
+                        Brush.linearGradient(
+                            listOf(
+                                colors.primary.copy(alpha = 0.18f),
+                                colors.secondary.copy(alpha = 0.10f)
+                            )
+                        ),
+                        RoundedCornerShape(14.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = colors.primary, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
             }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(14.dp))
             Text(
                 text = text,
                 fontSize = 14.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Medium,
+                lineHeight = 21.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = colors.onSurface,
                 modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = colors.primary.copy(alpha = 0.7f),
+                modifier = Modifier.size(18.dp)
             )
         }
     }
@@ -443,7 +662,7 @@ private fun PromptCard(icon: ImageVector, text: String, onClick: () -> Unit) {
 private fun ConversationList(
     messages: List<ChatMessage>,
     isAiTyping: Boolean,
-    errorMessage: String?,
+    errorText: String?,
     seenKeys: MutableSet<String>,
     onRetry: () -> Unit
 ) {
@@ -451,9 +670,14 @@ private fun ConversationList(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val showJumpToLatest by remember { derivedStateOf { listState.firstVisibleItemIndex > 1 } }
+    val reversed = remember(messages) { messages.asReversed() }
+    val lastIsUser = messages.lastOrNull()?.isUser == true
 
-    LaunchedEffect(messages.size, isAiTyping, errorMessage) {
-        listState.animateScrollToItem(0)
+    // بننزل لآخر الشات بس لو المستخدم قريب من الآخر أو هو اللي لسه باعت رسالة.
+    // لو بيقرا رسايل قديمة منسحبوش غصب (وزرار "انزل لآخر الشات" بيظهر).
+    LaunchedEffect(messages.size, isAiTyping, errorText) {
+        val nearBottom = listState.firstVisibleItemIndex <= 1
+        if (nearBottom || lastIsUser) listState.animateScrollToItem(0)
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -461,12 +685,12 @@ private fun ConversationList(
             state = listState,
             reverseLayout = true,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (errorMessage != null) {
+            if (errorText != null) {
                 item(key = "error") {
-                    Entrance(animate = true) { ErrorBubble(message = errorMessage, onRetry = onRetry) }
+                    Entrance(animate = true) { ErrorBubble(message = errorText, onRetry = onRetry) }
                 }
             }
             if (isAiTyping) {
@@ -474,12 +698,8 @@ private fun ConversationList(
                     Entrance(animate = true) { TypingBubble() }
                 }
             }
-            itemsIndexed(
-                items = messages.asReversed(),
-                key = { reversedIndex, message -> messageKey(messages.lastIndex - reversedIndex, message) }
-            ) { reversedIndex, message ->
-                val key = messageKey(messages.lastIndex - reversedIndex, message)
-                val isNew = remember(key) { seenKeys.add(key) }
+            items(items = reversed, key = { it.id }) { message ->
+                val isNew = remember(message.id) { seenKeys.add(message.id) }
                 Entrance(animate = isNew, fromEnd = message.isUser) {
                     if (message.isUser) UserBubble(message)
                     else AiBubble(message = message, typewriter = isNew)
@@ -493,7 +713,7 @@ private fun ConversationList(
             exit = scaleOut() + fadeOut(),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 8.dp)
+                .padding(bottom = 10.dp)
         ) {
             SmallFloatingActionButton(
                 onClick = { scope.launch { listState.animateScrollToItem(0) } },
@@ -513,21 +733,28 @@ private fun ConversationList(
 @Composable
 private fun UserBubble(message: ChatMessage) {
     val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomEnd = 4.dp, bottomStart = 20.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 52.dp),
+            .padding(start = 48.dp),
         horizontalAlignment = Alignment.End
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = 4.dp, bottomStart = 18.dp))
+                .shadow(
+                    elevation = 6.dp,
+                    shape = shape,
+                    ambientColor = colors.primary.copy(alpha = 0.4f),
+                    spotColor = colors.primary.copy(alpha = 0.4f)
+                )
+                .clip(shape)
                 .background(
                     Brush.linearGradient(
                         listOf(colors.primary, lerp(colors.primary, colors.secondary, 0.60f))
                     )
                 )
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
                 text = message.text,
@@ -535,82 +762,117 @@ private fun UserBubble(message: ChatMessage) {
                 color = colors.onPrimary
             )
         }
-        Spacer(Modifier.height(4.dp))
-        Text(text = message.timestamp, fontSize = 11.sp, color = colors.onSurfaceVariant)
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = rememberTimeText(message.timestamp),
+            fontSize = 11.sp,
+            color = colors.onSurfaceVariant,
+            modifier = Modifier.padding(end = 6.dp)
+        )
     }
 }
 
 @Composable
 private fun AiBubble(message: ChatMessage, typewriter: Boolean) {
     val colors = MaterialTheme.colorScheme
-    val (visibleText, isComplete) = rememberTypewriter(message.text, enabled = typewriter)
-
     val isEmergency = message.isEmergency
+
+    // رسالة الطوارئ بتتخزن فاضية وبتتعرض مترجمة من strings.xml
+    val displayText = if (isEmergency) {
+        stringResource(R.string.chat_emergency_message)
+    } else {
+        message.text
+    }
+    val (visibleText, isComplete) = rememberTypewriter(displayText, enabled = typewriter)
+    val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomEnd = 20.dp, bottomStart = 4.dp)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 40.dp),
+            .padding(end = 32.dp),
         verticalAlignment = Alignment.Top
     ) {
-        AiAvatar(size = 30.dp)
-        Spacer(Modifier.width(8.dp))
+        AiAvatar(size = 32.dp)
+        Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f, fill = false)) {
             Surface(
-                shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = 18.dp, bottomStart = 4.dp),
-                color = if (isEmergency) colors.errorContainer else colors.surfaceVariant,
+                shape = shape,
+                color = if (isEmergency) colors.errorContainer else colors.surface,
                 border = BorderStroke(
                     1.dp,
-                    if (isEmergency) colors.error else colors.outlineVariant.copy(alpha = 0.7f)
+                    if (isEmergency) colors.error else colors.outlineVariant.copy(alpha = 0.6f)
                 ),
-                shadowElevation = 1.dp
+                shadowElevation = 2.dp
             ) {
-                Text(
-                    text = buildAnnotatedString {
-                        append(visibleText)
-                        if (!isComplete) withStyle(SpanStyle(color = colors.primary)) { append("●") }
-                    },
-                    style = bubbleTextStyle(),
-                    color = if (isEmergency) colors.onErrorContainer else colors.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    if (isEmergency) {
+                        Icon(
+                            Icons.Filled.Warning,
+                            contentDescription = null,
+                            tint = colors.error,
+                            modifier = Modifier
+                                .padding(top = 2.dp)
+                                .size(20.dp)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                    }
+                    Text(
+                        text = buildAnnotatedString {
+                            append(visibleText)
+                            if (!isComplete) withStyle(SpanStyle(color = colors.primary)) { append(" ●") }
+                        },
+                        style = bubbleTextStyle(),
+                        color = if (isEmergency) colors.onErrorContainer else colors.onSurface,
+                        modifier = Modifier
+                            // قارئ الشاشة يقرا النص كامل مش وهو بيتكتب كلمة كلمة
+                            .semantics { contentDescription = displayText }
+                    )
+                }
             }
             AnimatedVisibility(visible = isComplete, enter = fadeIn() + expandVertically()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(R.string.assistant_ai_label) + " · " + message.timestamp,
+                        text = stringResource(R.string.assistant_ai_label) + " · " +
+                                rememberTimeText(message.timestamp),
                         fontSize = 11.sp,
                         color = colors.onSurfaceVariant,
                         modifier = Modifier.padding(start = 6.dp)
                     )
-                    CopyButton(text = message.text)
+                    CopyButton(text = displayText)
                 }
             }
         }
     }
 }
 
-/** بيظهر النص كلمة كلمة. بيرجع (النص الظاهر، خلص ولا لسه). */
+/**
+ * بيظهر النص كلمة كلمة. بيرجع (النص الظاهر، خلص ولا لسه).
+ * الزمن الكلي ثابت تقريباً (~3 ثواني): النص الطويل بيظهر أكتر من كلمة في كل خطوة.
+ */
 @Composable
 private fun rememberTypewriter(text: String, enabled: Boolean): Pair<String, Boolean> {
     val stops = remember(text) {
         buildList {
             text.forEachIndexed { i, c -> if (c.isWhitespace()) add(i + 1) }
             add(text.length)
-        }
+        }.distinct()
     }
+    val step = remember(stops) { (stops.size / 120).coerceAtLeast(1) }
     var stopIndex by remember(text) { mutableIntStateOf(if (enabled) 0 else stops.lastIndex) }
 
     LaunchedEffect(text) {
-        val perWord = (3000L / stops.size).coerceIn(12L, 45L)
         while (stopIndex < stops.lastIndex) {
-            delay(perWord)
-            stopIndex++
+            delay(25L)
+            stopIndex = (stopIndex + step).coerceAtMost(stops.lastIndex)
         }
     }
     return text.take(stops[stopIndex]) to (stopIndex >= stops.lastIndex)
 }
 
+@Suppress("DEPRECATION")
 @Composable
 private fun CopyButton(text: String) {
     val colors = MaterialTheme.colorScheme
@@ -653,15 +915,15 @@ private fun TypingBubble() {
         verticalAlignment = Alignment.Top,
         modifier = Modifier.semantics { contentDescription = typingLabel }
     ) {
-        AiAvatar(size = 30.dp)
-        Spacer(Modifier.width(8.dp))
+        AiAvatar(size = 32.dp)
+        Spacer(Modifier.width(10.dp))
         Surface(
-            shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = 18.dp, bottomStart = 4.dp),
-            color = colors.surfaceVariant,
-            border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.7f)),
-            shadowElevation = 1.dp
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomEnd = 20.dp, bottomStart = 4.dp),
+            color = colors.surface,
+            border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.6f)),
+            shadowElevation = 2.dp
         ) {
-            Box(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+            Box(Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
                 TypingDots(color = colors.primary)
             }
         }
@@ -708,10 +970,12 @@ private fun TypingDots(color: Color) {
 private fun ErrorBubble(message: String, onRetry: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         color = colors.errorContainer,
         border = BorderStroke(1.dp, colors.error.copy(alpha = 0.5f)),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { liveRegion = LiveRegionMode.Assertive }
     ) {
         Row(
             modifier = Modifier.padding(start = 14.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
@@ -747,20 +1011,30 @@ private fun ErrorBubble(message: String, onRetry: () -> Unit) {
 private fun UrgentNotice(onDismiss: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         color = colors.errorContainer,
         border = BorderStroke(1.dp, colors.error),
+        shadowElevation = 4.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 6.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            // التنبيه الطبي لازم قارئ الشاشة يعلنه فوراً
+            .semantics { liveRegion = LiveRegionMode.Assertive }
     ) {
         Row(
             modifier = Modifier.padding(start = 14.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
             verticalAlignment = Alignment.Top
         ) {
-            Icon(Icons.Filled.Warning, contentDescription = null, tint = colors.error)
-            Spacer(Modifier.width(10.dp))
-            Column(Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(colors.error.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Filled.Warning, contentDescription = null, tint = colors.error, modifier = Modifier.size(20.dp))
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f).padding(top = 2.dp)) {
                 Text(
                     text = stringResource(R.string.assistant_urgent_title),
                     fontSize = 14.sp,
@@ -793,65 +1067,89 @@ private fun ChatInputBar(
     value: String,
     onValueChange: (String) -> Unit,
     isBusy: Boolean,
+    canSend: Boolean,
     onSend: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     val borderColor by animateColorAsState(
-        targetValue = if (focused) colors.primary else colors.outlineVariant,
+        targetValue = if (focused) colors.primary else colors.outlineVariant.copy(alpha = 0.7f),
         label = "inputBorder"
     )
+    val pillShape = RoundedCornerShape(28.dp)
 
-    Surface(
-        color = colors.surface.copy(alpha = 0.95f),
-        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.5f)),
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
     ) {
-        Column(
+        // كبسولة عايمة (Floating pill) فيها الحقل + زرار الإرسال جوّاها
+        Surface(
+            shape = pillShape,
+            color = colors.surface,
+            border = BorderStroke(if (focused) 1.5.dp else 1.dp, borderColor),
+            shadowElevation = if (focused) 8.dp else 4.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                TextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.ask_placeholder),
+                            fontSize = 14.sp,
+                            color = colors.onSurfaceVariant
+                        )
+                    },
+                    textStyle = bubbleTextStyle(),
+                    maxLines = 4,
+                    interactionSource = interaction,
+                    // مفيش capitalization (ملهاش لازمة للعربي) وزرار الكيبورد بيبعت
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = { if (canSend) onSend() }),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedTextColor = colors.onSurface,
+                        unfocusedTextColor = colors.onSurface
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                SendButton(enabled = canSend, isBusy = isBusy, onClick = onSend)
+            }
+        }
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .padding(top = 8.dp, start = 8.dp, end = 8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.Top
         ) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                Surface(
-                    shape = RoundedCornerShape(26.dp),
-                    color = colors.surfaceVariant,
-                    border = BorderStroke(1.dp, borderColor),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    TextField(
-                        value = value,
-                        onValueChange = onValueChange,
-                        placeholder = { Text(stringResource(R.string.ask_placeholder), fontSize = 14.sp, color = colors.onSurfaceVariant) },
-                        textStyle = bubbleTextStyle(),
-                        maxLines = 4,
-                        interactionSource = interaction,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            focusedTextColor = colors.onSurface,
-                            unfocusedTextColor = colors.onSurface
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                SendButton(enabled = value.isNotBlank() && !isBusy, isBusy = isBusy, onClick = onSend)
-            }
+            Icon(
+                Icons.Outlined.Info,
+                contentDescription = null,
+                tint = colors.onSurfaceVariant.copy(alpha = 0.8f),
+                modifier = Modifier
+                    .padding(top = 1.dp)
+                    .size(13.dp)
+            )
+            Spacer(Modifier.width(5.dp))
             Text(
                 text = stringResource(R.string.assistant_disclaimer),
                 fontSize = 11.sp,
                 lineHeight = 16.sp,
                 color = colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 6.dp)
+                modifier = Modifier.weight(1f, fill = false)
             )
         }
     }
@@ -860,9 +1158,6 @@ private fun ChatInputBar(
 @Composable
 private fun SendButton(enabled: Boolean, isBusy: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val container by animateColorAsState(
-        if (enabled) colors.primary else colors.surfaceVariant, label = "sendContainer"
-    )
     val content by animateColorAsState(
         if (enabled) colors.onPrimary else colors.onSurfaceVariant, label = "sendContent"
     )
@@ -871,17 +1166,23 @@ private fun SendButton(enabled: Boolean, isBusy: Boolean, onClick: () -> Unit) {
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "sendScale"
     )
+    val activeBrush = Brush.linearGradient(
+        listOf(colors.primary, lerp(colors.primary, colors.secondary, 0.6f))
+    )
 
     Box(
         modifier = Modifier
             .padding(bottom = 2.dp)
-            .size(48.dp)
+            .size(46.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
             .clip(CircleShape)
-            .background(container)
+            .background(
+                if (enabled) activeBrush
+                else Brush.linearGradient(listOf(colors.surfaceVariant, colors.surfaceVariant))
+            )
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -941,31 +1242,42 @@ private fun AssistantDemoPreview() {
     MyApplicationTheme {
         var messages by remember { mutableStateOf(emptyList<ChatMessage>()) }
         var typing by remember { mutableStateOf(false) }
+        var input by remember { mutableStateOf("") }
         val scope = rememberCoroutineScope()
 
         AssistantContent(
+            conversationId = "preview",
             messages = messages,
             isAiTyping = typing,
-            errorMessage = null,
+            isRestoring = false,
+            error = null,
             showUrgentNotice = false,
             userName = "Moaz",
+            input = input,
+            onInputChange = { input = it },
             onSend = { text ->
-                messages = messages + ChatMessage("u${messages.size}", text, true, "10:00")
+                messages = messages + ChatMessage(
+                    text = text,
+                    isUser = true,
+                    timestamp = System.currentTimeMillis()
+                )
                 typing = true
                 scope.launch {
                     delay(1600)
                     messages = messages + ChatMessage(
-                        "a${messages.size}",
-                        "This is a demo reply so you can see the typing animation word by word. " +
-                            "Real answers will come from your backend once it is connected.",
-                        false,
-                        "10:00"
+                        text = "This is a demo reply so you can see the typing animation word by word. " +
+                                "Real answers will come from your backend once it is connected.",
+                        isUser = false,
+                        timestamp = System.currentTimeMillis()
                     )
                     typing = false
                 }
             },
             onRetry = {},
-            onDismissUrgentNotice = {}
+            onDismissUrgentNotice = {},
+            onBack = {},
+            onOpenHistory = {},
+            onNewChat = { messages = emptyList() }
         )
     }
 }

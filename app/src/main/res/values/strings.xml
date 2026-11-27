@@ -107,6 +107,23 @@
 
     <!-- Vision Lab Card -->
     <string name="vision_lab_title">Computer Vision Lab</string>
+    <string name="vision_lab_subtitle">AI-powered image analysis (educational)</string>
+    <string name="vision_disclaimer">This tool uses AI to highlight regions of interest in chest X-rays. It does NOT diagnose cancer or any disease. Always consult a qualified radiologist.</string>
+    <string name="capture_or_select">Capture or select chest X-ray</string>
+    <string name="tap_to_analyze">Tap "Analyze" to run AI evaluation</string>
+    <string name="analyzing">Analyzing image…</string>
+    <string name="analyzing_hint">This may take up to 60 seconds on CPU</string>
+    <string name="pick_photo">Pick Photo</string>
+    <string name="analyze">Analyze</string>
+    <string name="analysis_results">AI Analysis Results</string>
+    <string name="gradcam_title">Attention Heatmap (Grad-CAM)</string>
+    <string name="gradcam_subtitle">Shows which regions the AI focused on — not a diagnosis</string>
+    <string name="segmentation_title">Lung Segmentation</string>
+    <string name="segmentation_subtitle">AI-detected lung boundaries — for educational review only</string>
+    <string name="ai_not_diagnosis">⚠️ AI-generated educational output — NOT a medical diagnosis. Share these images with your clinician for professional interpretation.</string>
+    <string name="image_decode_error">Could not display image</string>
+    <string name="try_again">Try Again</string>
+    <string name="back">Back</string>
     <string name="vision_lab_desc">Capture or upload a chest X-ray for AI quality assessment (Demo)</string>
     <string name="vision_lab_btn">Open Vision Lab</string>
     <string name="vision_engine_ready">X-Ray Analysis Engine • Ready</string>
@@ -133,7 +150,7 @@
     <string name="ask_placeholder">Ask a question…</string>
     <string name="assistant_status_online">Online · Educational assistant</string>
     <string name="assistant_status_typing">Typing…</string>
-    <string name="assistant_welcome_title">Hi %1$s 👋</string>
+    <string name="assistant_welcome_title">Hi %1$s 🫩</string>
     <string name="assistant_welcome_body">Ask me about lung health, screening, or preparing for your clinic visit.</string>
     <string name="assistant_prompt_eligibility">Who is eligible for LDCT screening?</string>
     <string name="assistant_prompt_symptoms">What early symptoms should I watch for?</string>
@@ -146,7 +163,39 @@
     <string name="assistant_dismiss">Dismiss</string>
     <string name="assistant_scroll_bottom">Scroll to latest message</string>
     <string name="assistant_urgent_title">This may need urgent care</string>
-    <string name="assistant_urgent_body">If you have severe difficulty breathing, severe chest pain, or are coughing up blood, contact emergency services or seek urgent medical care now. Do not wait for a reply here.</string>>
+    <string name="assistant_urgent_body">If you have severe difficulty breathing, severe chest pain, or are coughing up blood, contact emergency services or seek urgent medical care now. Do not wait for a reply here.</string>
+
+    <!-- Assistant screen -->
+    <string name="chat_back">Back</string>
+    <string name="chat_history">Chat history</string>
+    <string name="chat_new_chat">New chat</string>
+    <string name="chat_default_user_name">there</string>
+    <string name="chat_loading_conversation">Loading conversation</string>
+    <string name="chat_emergency_message">⚠️ Urgent medical warning: the symptoms you described (such as coughing up blood or severe difficulty breathing) need immediate medical evaluation. Please go to the nearest emergency department. Do not rely on this assistant.</string>
+    <string name="chat_error_server">Error (%1$s): %2$s</string>
+    <string name="chat_error_interrupted">This message did not get a reply.</string>
+
+    <!-- History screen -->
+    <string name="chat_history_title">Chat history</string>
+    <string name="chat_history_local_note">Saved on this device only</string>
+    <string name="chat_history_empty_title">No conversations yet</string>
+    <string name="chat_history_empty_body">Your conversations with the assistant will appear here. They are stored only on this device.</string>
+    <string name="chat_history_new_chat">New chat</string>
+    <string name="chat_history_untitled">New conversation</string>
+    <string name="chat_history_current">Current</string>
+    <string name="chat_history_delete">Delete conversation</string>
+    <string name="chat_history_delete_all">Delete all conversations</string>
+    <string name="chat_history_delete_title">Delete this conversation?</string>
+    <string name="chat_history_delete_body">This conversation will be permanently removed from this device.</string>
+    <string name="chat_history_delete_all_title">Delete all conversations?</string>
+    <string name="chat_history_delete_all_body">All saved conversations will be permanently removed from this device. This action cannot be undone.</string>
+    <string name="chat_history_confirm_delete">Delete</string>
+    <string name="chat_history_cancel">Cancel</string>
+
+    <plurals name="chat_history_message_count">
+        <item quantity="one">%d message</item>
+        <item quantity="other">%d messages</item>
+    </plurals>
 
     <!-- Care Journey -->
     <string name="care_title">Care Journey</string>
@@ -364,6 +413,8 @@
     <string name="error_timeout">The server took too long to respond. Please retry.</string>
     <string name="error_secure_connection">Could not establish a secure connection.</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_server">Server error. Please retry.</string>
+    <string name="error_network">Network error. Check your connection.</string>
     <string name="retry">Retry</string>
 
     <!-- Profile Screen Strings -->

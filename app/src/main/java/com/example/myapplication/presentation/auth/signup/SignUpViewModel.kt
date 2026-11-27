@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SignUpViewModel(
+class SignUpViewModel @JvmOverloads constructor(
     private val repository: AuthRepository = FirebaseAuthRepository(),
 ) : ViewModel() {
 
