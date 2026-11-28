@@ -1040,7 +1040,7 @@ private fun AddRecordSheet(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text(stringResource(R.string.records_field_title)) },
-                    placeholder = { Text("e.g., Complete Blood Count") },
+                    placeholder = { Text(com.example.myapplication.core.ui.loc("e.g., Complete Blood Count", "مثلًا: صورة دم كاملة")) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = recordTextFieldColors()
