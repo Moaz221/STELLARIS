@@ -59,6 +59,14 @@ fun CareJourneyScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val p = lungCarePalette()
+    var manage by remember { mutableStateOf<String?>(null) }
+    val appContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    (uiState as? CareJourneyUiState.Content)?.let { c ->
+        LaunchedEffect(c.data.medications) {
+            com.example.myapplication.core.reminders.ReminderScheduler.rescheduleAll(appContext, c.data.medications)
+        }
+        manage?.let { k -> CareManagerDialog(k, c.data, viewModel) { manage = null } }
+    }
 
     Box(Modifier.fillMaxSize().background(p.background)) {
         when (val s = uiState) {
@@ -69,10 +77,10 @@ fun CareJourneyScreen(
                 data = s.data,
                 journey = viewModel.journey,
                 onOpenDiagnosis = onOpenDiagnosis,
-                onOpenAppointment = onOpenAppointment,
-                onOpenMedications = onOpenMedications,
-                onOpenSideEffects = onOpenSideEffects,
-                onAddSideEffect = onAddSideEffect,
+                onOpenAppointment = { manage = "appointment" },
+                onOpenMedications = { manage = "medication" },
+                onOpenSideEffects = { manage = "side_effect" },
+                onAddSideEffect = { manage = "side_effect" },
                 onOpenQuestions = onOpenQuestions,
                 onOpenRecords = onOpenRecords,
                 onOpenEducation = onOpenEducation,
@@ -122,7 +130,7 @@ private fun Content(
                         Text(stringResource(R.string.care_title), fontSize = 24.sp, fontWeight = FontWeight.Bold, color = p.textPrimary)
                         Text(stringResource(R.string.care_subtitle), fontSize = 12.sp, color = p.textSecondary, modifier = Modifier.padding(top = 2.dp))
                     }
-                    SourceTag(p, SourceType.DEMO, VerificationStatus.UNVERIFIED)
+                    Unit
                 }
             }
         }
@@ -205,7 +213,7 @@ private fun Content(
                 Column {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         SectionTitle(p, stringResource(R.string.medications_section), Modifier.weight(1f))
-                        SourceTag(p, SourceType.DEMO, VerificationStatus.UNVERIFIED, small = true)
+                        Unit
                     }
                     Spacer(Modifier.height(10.dp))
                     CareCard(p, radius = 18.dp) {

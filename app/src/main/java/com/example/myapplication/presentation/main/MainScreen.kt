@@ -428,7 +428,12 @@ private fun MainTabContent(
         MainTab.Assistant -> Unit
 
         MainTab.Care -> {
-            CareJourneyScreen()
+            CareJourneyScreen(
+                onOpenQuestions = { onOpenOverlay(OverlayScreen.DOCTOR_QUESTIONS) },
+                onOpenRecords = { onOpenOverlay(OverlayScreen.RECORDS) },
+                onOpenEducation = { onOpenOverlay(OverlayScreen.EDUCATION_HUB) },
+                onShareSummary = { onOpenOverlay(OverlayScreen.SYMPTOMS_TRACKER) }
+            )
         }
 
         MainTab.Profile -> {

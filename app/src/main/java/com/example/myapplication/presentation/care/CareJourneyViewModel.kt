@@ -6,7 +6,8 @@ import com.example.myapplication.R
 import com.example.myapplication.core.model.CareJourneyState
 import com.example.myapplication.core.model.JourneyType
 import com.example.myapplication.data.care.CareRepository
-import com.example.myapplication.data.care.FakeCareRepository
+import com.example.myapplication.data.care.LocalCareRepository
+import com.example.myapplication.core.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,7 @@ sealed interface CareJourneyUiState {
 }
 
 class CareJourneyViewModel @JvmOverloads constructor(
-    private val repository: CareRepository = FakeCareRepository(),
+    private val repository: CareRepository = LocalCareRepository(),
     val journey: JourneyType = JourneyType.DIAGNOSED
 ) : ViewModel() {
 
@@ -47,4 +48,26 @@ class CareJourneyViewModel @JvmOverloads constructor(
             }
         }
     }
+
+    private fun update(block: suspend () -> CareJourneyState) {
+        viewModelScope.launch {
+            try { _uiState.value = CareJourneyUiState.Content(block()) } catch (e: Exception) { _uiState.value = CareJourneyUiState.Error(R.string.error_load_care) }
+        }
+    }
+
+    private fun now(): String = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+
+    fun addAppointment(title: String, facility: String, dateTime: String, notes: String) = update {
+        repository.addAppointment(Appointment(java.util.UUID.randomUUID().toString(), title, facility, null, dateTime, AppointmentType.OTHER, AppointmentStatus.UPCOMING, notes.ifBlank { null }, SourceType.PATIENT_ENTERED, VerificationStatus.USER_CONFIRMED, now(), now()))
+    }
+
+    fun addMedication(name: String, instructions: String, times: List<String>) = update {
+        repository.addMedication(Medication(java.util.UUID.randomUUID().toString(), name, instructions, times, true, SourceType.PATIENT_ENTERED, VerificationStatus.USER_CONFIRMED, now(), now()))
+    }
+
+    fun addSideEffect(name: String, severity: SideEffectSeverity, notes: String) = update {
+        repository.addSideEffect(SideEffectEntry(java.util.UUID.randomUUID().toString(), name, severity, now(), notes.ifBlank { null }, SourceType.PATIENT_ENTERED, VerificationStatus.USER_CONFIRMED, now(), now()))
+    }
+
+    fun delete(kind: String, id: String) = update { repository.delete(kind, id) }
 }

@@ -1,6 +1,8 @@
 package com.example.myapplication.core.model
 
+@kotlinx.serialization.Serializable
 enum class SourceType { PATIENT_ENTERED, CLINICIAN_PROVIDED, IMPORTED, AI_GENERATED, DEMO }
+@kotlinx.serialization.Serializable
 enum class VerificationStatus { UNVERIFIED, USER_CONFIRMED, CLINICIAN_CONFIRMED }
 
 interface HealthRecord {
@@ -11,8 +13,10 @@ interface HealthRecord {
     val updatedAt: String
 }
 
+@kotlinx.serialization.Serializable
 enum class JourneyType { EARLY_DETECTION, EVALUATION, DIAGNOSED }
 
+@kotlinx.serialization.Serializable
 data class DiagnosisInfo(
     override val id: String,
     val title: String,
@@ -25,9 +29,12 @@ data class DiagnosisInfo(
     override val updatedAt: String
 ) : HealthRecord
 
+@kotlinx.serialization.Serializable
 enum class AppointmentType { CONSULTATION, IMAGING, INFUSION, LAB, OTHER }
+@kotlinx.serialization.Serializable
 enum class AppointmentStatus { UPCOMING, COMPLETED, MISSED, CANCELLED }
 
+@kotlinx.serialization.Serializable
 data class Appointment(
     override val id: String,
     val title: String,
@@ -43,6 +50,7 @@ data class Appointment(
     override val updatedAt: String
 ) : HealthRecord
 
+@kotlinx.serialization.Serializable
 data class Medication(
     override val id: String,
     val name: String,
@@ -55,8 +63,10 @@ data class Medication(
     override val updatedAt: String
 ) : HealthRecord
 
+@kotlinx.serialization.Serializable
 enum class SideEffectSeverity { MILD, MODERATE, SEVERE }
 
+@kotlinx.serialization.Serializable
 data class SideEffectEntry(
     override val id: String,
     val name: String,
@@ -69,6 +79,7 @@ data class SideEffectEntry(
     override val updatedAt: String
 ) : HealthRecord
 
+@kotlinx.serialization.Serializable
 data class FollowUpMilestone(
     override val id: String,
     val title: String,
