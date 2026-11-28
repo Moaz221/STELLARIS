@@ -188,6 +188,14 @@ fun HomeScreen(
         label = "glowPulse"
     )
 
+    val ctxForIcon = androidx.compose.ui.platform.LocalContext.current
+    LaunchedEffect(Unit) {
+        val saved = ctxForIcon.getSharedPreferences("stellaris_prefs", android.content.Context.MODE_PRIVATE).getString("journey", null)
+        if (saved != null) {
+            if (uiState.journeyType == null) runCatching { JourneyType.valueOf(saved) }.getOrNull()?.let { viewModel.selectJourney(it) }
+            com.example.myapplication.core.icon.AppIconSwitcher.apply(ctxForIcon, saved)
+        }
+    }
     var showNotifs by remember { mutableStateOf(false) }
     if (showNotifs) NotificationsDialog(onClose = { showNotifs = false })
     val articles = starterArticles()
@@ -249,7 +257,11 @@ fun HomeScreen(
             item(key = "journey") {
                 JourneyControl(
                     selectedJourney = uiState.journeyType,
-                    onJourneySelected = { viewModel.selectJourney(it) }
+                    onJourneySelected = {
+                        viewModel.selectJourney(it)
+                        ctxForIcon.getSharedPreferences("stellaris_prefs", android.content.Context.MODE_PRIVATE).edit().putString("journey", it.name).apply()
+                        com.example.myapplication.core.icon.AppIconSwitcher.apply(ctxForIcon, it.name)
+                    }
                 )
             }
 
@@ -801,17 +813,17 @@ private fun NextStepCard(
         null -> onOpenQuestions
     }
 
-    // Fixed dark "gaming" hero: same look in light and dark mode, no pale gradients.
-    val heroTop = Color(0xFF060D22)
-    val heroBottom = Color(0xFF0B2150)
-    val neon = Color(0xFF39D0FF)
+    // Hero follows the app palette (dark neon in dark mode, same surfaces/borders as the other cards).
+    val heroTop = p.cardTop
+    val heroBottom = p.cardBottom
+    val neon = p.accent
     val heroShape = RoundedCornerShape(28.dp)
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(heroShape)
             .background(Brush.linearGradient(listOf(heroTop, heroBottom)))
-            .border(1.5.dp, Brush.linearGradient(listOf(neon, Color(0xFF6A5CFF))), heroShape)
+            .border(1.5.dp, Brush.linearGradient(listOf(p.accent, p.accentDeep)), heroShape)
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -825,8 +837,8 @@ private fun NextStepCard(
             if (lungStatusPercent != null) {
                 Text(
                     text = stringResource(R.string.home_lung_status) + " " + lungStatusPercent + "%",
-                    fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White,
-                    modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0x3339D0FF)).padding(horizontal = 10.dp, vertical = 4.dp)
+                    fontSize = 12.sp, fontWeight = FontWeight.Bold, color = p.textPrimary,
+                    modifier = Modifier.clip(RoundedCornerShape(50)).background(p.accent.copy(alpha = 0.18f)).padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
         }
@@ -834,46 +846,57 @@ private fun NextStepCard(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = stringResource(titleRes),
-                    fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, color = Color.White
+                    fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, color = p.textPrimary
                 )
                 androidx.compose.animation.Crossfade(targetState = messageIndex, label = "heroMsg") { idx ->
                     Text(
                         text = stringResource(rotatingMessages[idx % rotatingMessages.size]),
-                        fontSize = 14.sp, lineHeight = 20.sp, color = Color(0xFFC3DAF2)
+                        fontSize = 14.sp, lineHeight = 20.sp, color = p.textSecondary
                     )
                 }
             }
-            Canvas(Modifier.size(104.dp)) {
-                val c = Offset(size.width / 2, size.height / 2)
-                val r = size.minDimension / 2
-                drawCircle(neon.copy(alpha = 0.10f), radius = r * 0.92f)
-                drawCircle(neon.copy(alpha = 0.55f), radius = r * 0.92f, style = Stroke(2.dp.toPx()))
-                drawCircle(Color(0xFF6A5CFF).copy(alpha = 0.6f), radius = r * 0.70f, style = Stroke(1.dp.toPx()))
-                // orbiting star
-                val ang = Math.toRadians(dotRotation.toDouble())
-                val sx = c.x + (r * 0.92f) * Math.cos(ang).toFloat()
-                val sy = c.y + (r * 0.92f) * Math.sin(ang).toFloat()
-                drawCircle(Color.White, radius = 4.dp.toPx(), center = Offset(sx, sy))
-                drawCircle(neon.copy(alpha = 0.35f), radius = 8.dp.toPx(), center = Offset(sx, sy))
-                // lungs
+            Canvas(Modifier.size(112.dp)) {
                 val w = size.width; val h = size.height
-                fun lung(mirror: Boolean): Path {
-                    fun x(v: Float) = if (mirror) w - v * w else v * w
-                    return Path().apply {
-                        moveTo(x(0.47f), h * 0.36f)
-                        cubicTo(x(0.30f), h * 0.34f, x(0.20f), h * 0.52f, x(0.22f), h * 0.66f)
-                        cubicTo(x(0.24f), h * 0.74f, x(0.40f), h * 0.74f, x(0.46f), h * 0.64f)
-                        close()
+                val breathe = lungScale // 0.95..1.05 loop, drives expand/contract
+                // soft glow that follows the breathing
+                drawCircle(
+                    Brush.radialGradient(listOf(neon.copy(alpha = 0.30f * lungPulse), Color.Transparent), center = Offset(w / 2, h * 0.55f), radius = w * 0.62f),
+                    radius = w * 0.62f, center = Offset(w / 2, h * 0.55f)
+                )
+                // rising particles
+                for (i in 0 until 7) {
+                    val ph = (particleOffset + i / 7f) % 1f
+                    val px = w * (0.18f + 0.64f * ((i * 37) % 100) / 100f) + kotlin.math.sin((ph * 6.28f) + i) * 4.dp.toPx()
+                    val py = h * (0.95f - 0.8f * ph)
+                    drawCircle(neon.copy(alpha = (1f - ph) * 0.7f), radius = (1.5f + (i % 3)).dp.toPx(), center = Offset(px, py))
+                }
+                // lungs, scaled around the chest centre
+                androidx.compose.ui.graphics.drawscope.withTransform({
+                    scale(breathe, breathe, Offset(w / 2, h * 0.56f))
+                }) {
+                    fun lung(mirror: Boolean): Path {
+                        fun x(v: Float) = if (mirror) w - v * w else v * w
+                        return Path().apply {
+                            moveTo(x(0.47f), h * 0.34f)
+                            cubicTo(x(0.30f), h * 0.32f, x(0.16f), h * 0.52f, x(0.18f), h * 0.68f)
+                            cubicTo(x(0.20f), h * 0.80f, x(0.40f), h * 0.80f, x(0.46f), h * 0.66f)
+                            close()
+                        }
+                    }
+                    val stroke = Stroke(2.6.dp.toPx(), cap = StrokeCap.Round)
+                    val fillA = 0.14f + 0.16f * lungPulse
+                    drawPath(lung(false), neon.copy(alpha = fillA)); drawPath(lung(true), neon.copy(alpha = fillA))
+                    drawPath(lung(false), neon, style = stroke); drawPath(lung(true), neon, style = stroke)
+                    val sw = 2.6.dp.toPx()
+                    drawLine(neon, Offset(w * 0.5f, h * 0.16f), Offset(w * 0.5f, h * 0.42f), strokeWidth = sw, cap = StrokeCap.Round)
+                    drawLine(neon, Offset(w * 0.5f, h * 0.42f), Offset(w * 0.39f, h * 0.52f), strokeWidth = sw * 0.8f, cap = StrokeCap.Round)
+                    drawLine(neon, Offset(w * 0.5f, h * 0.42f), Offset(w * 0.61f, h * 0.52f), strokeWidth = sw * 0.8f, cap = StrokeCap.Round)
+                    // small inner branches
+                    for (m in listOf(false, true)) {
+                        val sx = if (m) -1f else 1f
+                        drawLine(neon.copy(alpha = 0.6f), Offset(w * (0.5f - 0.09f * sx), h * 0.52f), Offset(w * (0.5f - 0.17f * sx), h * 0.66f), strokeWidth = sw * 0.6f, cap = StrokeCap.Round)
                     }
                 }
-                val stroke = Stroke(2.5.dp.toPx(), cap = StrokeCap.Round)
-                drawPath(lung(false), neon.copy(alpha = 0.25f * lungPulse + 0.1f))
-                drawPath(lung(true), neon.copy(alpha = 0.25f * lungPulse + 0.1f))
-                drawPath(lung(false), neon, style = stroke)
-                drawPath(lung(true), neon, style = stroke)
-                drawLine(neon, Offset(w * 0.5f, h * 0.22f), Offset(w * 0.5f, h * 0.45f), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
-                drawLine(neon, Offset(w * 0.5f, h * 0.45f), Offset(w * 0.40f, h * 0.52f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
-                drawLine(neon, Offset(w * 0.5f, h * 0.45f), Offset(w * 0.60f, h * 0.52f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -881,7 +904,7 @@ private fun NextStepCard(
                 val sel = i == messageIndex % rotatingMessages.size
                 Box(
                     Modifier.height(6.dp).width(if (sel) 24.dp else 6.dp).clip(RoundedCornerShape(50))
-                        .background(if (sel) neon else Color(0x5539D0FF))
+                        .background(if (sel) neon else neon.copy(alpha = 0.3f))
                 )
             }
         }
@@ -889,7 +912,7 @@ private fun NextStepCard(
             onClick = onAction,
             modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = neon, contentColor = Color(0xFF04101F)),
+            colors = ButtonDefaults.buttonColors(containerColor = neon, contentColor = p.background),
             elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp)
         ) {
             Text(text = stringResource(actionRes), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)

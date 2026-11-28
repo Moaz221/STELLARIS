@@ -17,9 +17,9 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_default"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_default"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <provider
@@ -51,12 +51,25 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MyApplication">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
+
+        <!-- Status launcher icons: exactly one alias is enabled at a time (see core/icon/AppIconSwitcher). -->
+        <activity-alias android:name=".IconDefault" android:targetActivity=".MainActivity" android:enabled="true" android:exported="true"
+            android:icon="@mipmap/ic_launcher_default" android:roundIcon="@mipmap/ic_launcher_default" android:label="@string/app_name">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".IconEarly" android:targetActivity=".MainActivity" android:enabled="false" android:exported="true"
+            android:icon="@mipmap/ic_launcher_early" android:roundIcon="@mipmap/ic_launcher_early" android:label="@string/app_name">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".IconEvaluation" android:targetActivity=".MainActivity" android:enabled="false" android:exported="true"
+            android:icon="@mipmap/ic_launcher_evaluation" android:roundIcon="@mipmap/ic_launcher_evaluation" android:label="@string/app_name">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".IconDiagnosed" android:targetActivity=".MainActivity" android:enabled="false" android:exported="true"
+            android:icon="@mipmap/ic_launcher_diagnosed" android:roundIcon="@mipmap/ic_launcher_diagnosed" android:label="@string/app_name">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
     </application>
 
 </manifest>
