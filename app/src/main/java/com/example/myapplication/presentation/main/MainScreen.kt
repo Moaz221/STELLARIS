@@ -107,7 +107,9 @@ enum class OverlayScreen {
     EDUCATION_HUB,
     SYMPTOMS_TRACKER,
     RECORDS,
-    ASSISTANT
+    ASSISTANT,
+    PRIVACY_POLICY,
+    HOW_TO_USE
 }
 
 private val mainTabs = listOf(
@@ -219,7 +221,8 @@ fun MainScreen(
                 Box(Modifier.fillMaxSize()) {
                     OverlayContent(
                         screen = activeOverlay,
-                        onBack = closeOverlay
+                        onBack = closeOverlay,
+                        onOpenOverlayFromInfo = openOverlay
                     )
                     val kind = activeOverlay
                     if (kind == OverlayScreen.SYMPTOMS_TRACKER || kind == OverlayScreen.RISK_ASSESSMENT ||
@@ -486,7 +489,9 @@ private fun MainTabContent(
                 },
                 onNavigateToDesignPreview = {
                     onOpenOverlay(OverlayScreen.RECORDS)
-                }
+                },
+                onPrivacy = { onOpenOverlay(OverlayScreen.PRIVACY_POLICY) },
+                onHelp = { onOpenOverlay(OverlayScreen.HOW_TO_USE) }
             )
             if (editing) {
                 com.example.myapplication.core.ui.FullScreenForm(
@@ -517,7 +522,8 @@ private fun MainTabContent(
 @Composable
 private fun OverlayContent(
     screen: OverlayScreen,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenOverlayFromInfo: (OverlayScreen) -> Unit = {}
 ) {
     when (screen) {
         OverlayScreen.VISION_LAB -> {
@@ -548,6 +554,8 @@ private fun OverlayContent(
             AssistantFlow(onBack = onBack)
         }
 
+        OverlayScreen.PRIVACY_POLICY -> com.example.myapplication.presentation.info.PrivacyPolicyScreen(onBack = onBack)
+        OverlayScreen.HOW_TO_USE -> com.example.myapplication.presentation.info.HowToUseScreen(onBack = onBack, onOpen = onOpenOverlayFromInfo)
         OverlayScreen.NONE -> Unit
     }
 }

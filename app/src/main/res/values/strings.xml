@@ -456,4 +456,8 @@
     <string name="share_ai_button">Share with AI</string>
     <string name="share_ai_nothing">Nothing saved yet to share. Add data first.</string>
     <string name="take_photo">Take Photo</string>
+    <string name="profile_item_privpol_title">Privacy Policy</string>
+    <string name="profile_item_privpol_subtitle">What data the app uses and where it goes</string>
+    <string name="profile_item_howuse_title">How to use the app</string>
+    <string name="profile_item_howuse_subtitle">Step-by-step guide and full documentation</string>
 </resources>

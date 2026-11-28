@@ -460,4 +460,8 @@
     <string name="share_ai_button">شارك مع المساعد</string>
     <string name="share_ai_nothing">مفيش بيانات محفوظة تتشارك. ضيف بيانات الأول.</string>
     <string name="take_photo">التقط صورة</string>
+    <string name="profile_item_privpol_title">سياسة الخصوصية</string>
+    <string name="profile_item_privpol_subtitle">البيانات اللي التطبيق بيستخدمها وبتروح فين</string>
+    <string name="profile_item_howuse_title">إزاي تستخدم التطبيق</string>
+    <string name="profile_item_howuse_subtitle">دليل خطوة بخطوة والتوثيق الكامل</string>
 </resources>
