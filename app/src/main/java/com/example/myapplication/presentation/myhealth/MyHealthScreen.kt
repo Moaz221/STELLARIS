@@ -56,6 +56,10 @@ fun MyHealthScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val p = homePalette()
+    val healthCtx = androidx.compose.ui.platform.LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.refresh(healthCtx.getSharedPreferences("stellaris_prefs", android.content.Context.MODE_PRIVATE).getString("journey", null))
+    }
 
     Box(
         modifier = Modifier
@@ -124,19 +128,6 @@ fun MyHealthScreen(
             // Journey-aware sections
             when (uiState.journeyType) {
                 JourneyType.EARLY_DETECTION -> {
-                    item(key = "risk_factors") {
-                        HealthSectionCard(
-                            icon = Icons.Outlined.Warning,
-                            title = stringResource(R.string.my_health_risk_factors),
-                            count = uiState.riskFactorCount,
-                            countLabel = stringResource(R.string.my_health_factors_active),
-                            accentColor = p.warning,
-                            onClick = onNavigateToRiskAssessment
-                        ) {
-                            RiskFactorsPreview(uiState.riskFactors)
-                        }
-                    }
-
                     item(key = "symptoms") {
                         HealthSectionCard(
                             icon = Icons.Outlined.MonitorHeart,
@@ -343,6 +334,15 @@ private fun EarlyDetectionOverviewCard(
                     color = p.textSecondary
                 )
             }
+        }
+        Spacer(Modifier.height(10.dp))
+        if (state.riskFactors.isEmpty()) {
+            Text(
+                text = com.example.myapplication.core.ui.loc("No risk check saved yet. Tap to start the check.", "لسه مفيش تقييم محفوظ. اضغط عشان تبدأ التقييم."),
+                fontSize = 13.sp, color = p.textSecondary
+            )
+        } else {
+            RiskFactorsPreview(state.riskFactors)
         }
     }
 }
@@ -634,7 +634,7 @@ private fun RiskFactorsPreview(factors: List<RiskFactor>) {
     val p = homePalette()
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        factors.filter { it.isActive }.take(3).forEach { factor ->
+        factors.filter { it.isActive }.take(4).forEach { factor ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

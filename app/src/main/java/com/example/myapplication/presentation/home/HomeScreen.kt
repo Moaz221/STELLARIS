@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -871,7 +872,7 @@ private fun NextStepCard(
                     drawCircle(neon.copy(alpha = (1f - ph) * 0.7f), radius = (1.5f + (i % 3)).dp.toPx(), center = Offset(px, py))
                 }
                 // lungs, scaled around the chest centre
-                androidx.compose.ui.graphics.drawscope.withTransform({
+                withTransform({
                     scale(breathe, breathe, Offset(w / 2, h * 0.56f))
                 }) {
                     fun lung(mirror: Boolean): Path {

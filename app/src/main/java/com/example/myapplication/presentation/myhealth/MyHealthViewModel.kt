@@ -1,5 +1,7 @@
 package com.example.myapplication.presentation.myhealth
 
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.presentation.home.JourneyType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,16 +124,58 @@ class MyHealthViewModel : ViewModel() {
     val uiState: StateFlow<MyHealthUiState> = _uiState.asStateFlow()
 
     init {
-        loadPrototypeData()
+        refresh()
     }
 
     fun setJourney(journey: JourneyType) {
         _uiState.value = _uiState.value.copy(journeyType = journey)
     }
 
-    private fun loadPrototypeData() {
-        // No demo data: the screen starts empty and shows only what the user saves.
-        val name = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.displayName.orEmpty()
-        _uiState.value = MyHealthUiState(journeyType = JourneyType.EARLY_DETECTION, userName = name)
+    /** Reads everything the user saved in the other screens. Call whenever this screen is shown. */
+    fun refresh(savedJourney: String? = null) {
+        viewModelScope.launch {
+            try {
+                val name = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.displayName.orEmpty()
+                val symptoms = com.example.myapplication.data.local.AppStore.load("symptoms", com.example.myapplication.presentation.symptoms.TrackedSymptom.serializer())
+                val records = com.example.myapplication.data.local.AppStore.load("records", com.example.myapplication.presentation.records.MedicalRecord.serializer())
+                val questions = com.example.myapplication.data.local.AppStore.load("questions", com.example.myapplication.presentation.questions.QuestionItem.serializer())
+                val risks = com.example.myapplication.data.local.AppStore.load("risk", com.example.myapplication.presentation.risk.RiskResult.serializer())
+                val care = com.example.myapplication.data.care.LocalCareRepository().getCareJourney()
+
+                val activeSymptoms = symptoms.filter { !it.isResolved }
+                val risk = risks.lastOrNull()
+                val lv = risk?.level?.uppercase().orEmpty()
+                val level = when { lv.contains("HIGH") || lv.contains("ELEV") -> RiskLevel.ELEVATED; lv.contains("MOD") -> RiskLevel.MODERATE; else -> RiskLevel.LOW }
+                // Risk "factors" = the lines of the saved check summary (what the user answered), newest check only.
+                val factorLine = risk?.summary.orEmpty().lines().map { it.trim() }.firstOrNull { it.startsWith("Risk factors:", true) || it.startsWith("عوامل الخطر:") }
+                val factors = factorLine?.substringAfter(":")?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }.orEmpty()
+                    .mapIndexed { i, l -> RiskFactor("rf$i", l, true) }
+                val activeQuestions = questions.filter { it.status == "ACTIVE" }
+                val journey = runCatching { JourneyType.valueOf(savedJourney ?: "") }.getOrNull() ?: _uiState.value.journeyType
+                _uiState.value = MyHealthUiState(
+                    journeyType = journey,
+                    userName = name,
+                    riskLevel = level,
+                    riskFactors = factors,
+                    riskFactorCount = factors.size,
+                    screeningDue = risk?.eligibleForScreening == true,
+                    screeningMessage = risk?.summary.orEmpty().lines().lastOrNull { it.isNotBlank() }.orEmpty(),
+                    recentSymptoms = symptoms.sortedByDescending { it.timestamp }.take(3).map { SymptomEntry(it.id, it.name, it.severity, it.dateLogged, it.isResolved) },
+                    activeSymptomCount = activeSymptoms.size,
+                    recentRecords = records.take(3).map { MedicalRecord(it.id, it.title, it.type.name, it.date, it.status.name) },
+                    pendingResultsCount = records.count { it.status.name == "PENDING" },
+                    doctorQuestions = activeQuestions.take(3).map { DoctorQuestion(it.id, it.text, false, "") },
+                    unansweredCount = activeQuestions.size,
+                    medications = care.medications.map { Medication(it.id, it.name, it.instructions, "", it.reminderTimes.joinToString(", ")) },
+                    sideEffects = care.sideEffects.take(3).map { SideEffect(it.id, it.name, when (it.severity.name) { "MILD" -> 1; "MODERATE" -> 3; else -> 5 }, it.date, null) },
+                    activeSideEffectCount = care.sideEffects.size,
+                    appointments = care.appointments.filter { it.status.name == "UPCOMING" }.map { Appointment(it.id, it.doctor ?: it.title, it.title, it.dateTime, "", it.facility) },
+                    treatmentName = care.diagnosis?.title.orEmpty(),
+                    isLoading = false
+                )
+            } catch (e: Exception) {
+                // keep the previous state
+            }
+        }
     }
 }
