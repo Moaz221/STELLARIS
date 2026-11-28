@@ -453,4 +453,6 @@
     <string name="profile_sign_out_dialog_body">You will need to sign in again to access your health information.</string>
     <string name="profile_cancel">Cancel</string>
     <string name="profile_app_version">LungCare AI · v%1$s</string>
+    <string name="share_ai_button">Share with AI</string>
+    <string name="share_ai_nothing">Nothing saved yet to share. Add data first.</string>
 </resources>

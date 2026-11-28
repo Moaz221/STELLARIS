@@ -36,6 +36,10 @@ fun AssistantFlow(onBack: () -> Unit) {
     // الـ draft هنا (مش جوه الشات) عشان ما يضيعش لما المستخدم يفتح الـ History ويرجع
     var draft by rememberSaveable { mutableStateOf("") }
 
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        ShareWithAi.take()?.let { assistantViewModel.sendMessage(it) }
+    }
+
     BackHandler(enabled = showHistory) { showHistory = false }
 
     AnimatedContent(

@@ -29,6 +29,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.launch
+import com.example.myapplication.presentation.assistant.ShareWithAi
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -106,6 +108,7 @@ enum class OverlayScreen {
     EDUCATION_HUB,
     DESIGN_SYSTEM_PREVIEW,
     SYMPTOMS_TRACKER,
+    RECORDS,
     ASSISTANT
 }
 
@@ -210,10 +213,47 @@ fun MainScreen(
             stateHolder.SaveableStateProvider(
                 key = "overlay_${activeOverlay.name}"
             ) {
-                OverlayContent(
-                    screen = activeOverlay,
-                    onBack = closeOverlay
-                )
+                val shareScope = androidx.compose.runtime.rememberCoroutineScope()
+                val shareContext = androidx.compose.ui.platform.LocalContext.current
+                Box(Modifier.fillMaxSize()) {
+                    OverlayContent(
+                        screen = activeOverlay,
+                        onBack = closeOverlay
+                    )
+                    val kind = activeOverlay
+                    if (kind == OverlayScreen.SYMPTOMS_TRACKER || kind == OverlayScreen.RISK_ASSESSMENT ||
+                        kind == OverlayScreen.DOCTOR_QUESTIONS || kind == OverlayScreen.RECORDS
+                    ) {
+                        androidx.compose.material3.ExtendedFloatingActionButton(
+                            onClick = {
+                                shareScope.launch {
+                                    val text = when (kind) {
+                                        OverlayScreen.SYMPTOMS_TRACKER -> ShareWithAi.symptoms()
+                                        OverlayScreen.RISK_ASSESSMENT -> ShareWithAi.risk()
+                                        OverlayScreen.DOCTOR_QUESTIONS -> ShareWithAi.questions()
+                                        else -> ShareWithAi.records()
+                                    }
+                                    if (text == null) {
+                                        android.widget.Toast.makeText(
+                                            shareContext,
+                                            shareContext.getString(R.string.share_ai_nothing),
+                                            android.widget.Toast.LENGTH_LONG
+                                        ).show()
+                                    } else {
+                                        ShareWithAi.pending = text
+                                        openOverlay(OverlayScreen.ASSISTANT)
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .align(androidx.compose.ui.Alignment.BottomEnd)
+                                .navigationBarsPadding()
+                                .padding(16.dp)
+                        ) {
+                            Text(stringResource(R.string.share_ai_button))
+                        }
+                    }
+                }
             }
         }
     }
@@ -434,6 +474,10 @@ private fun OverlayContent(
 
         OverlayScreen.SYMPTOMS_TRACKER -> {
             SymptomTrackerScreen(onBack = onBack)
+        }
+
+        OverlayScreen.RECORDS -> {
+            com.example.myapplication.presentation.records.MedicalRecordsScreen(onNavigateBack = onBack)
         }
 
         OverlayScreen.ASSISTANT -> {

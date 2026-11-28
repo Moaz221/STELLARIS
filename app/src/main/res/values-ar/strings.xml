@@ -457,4 +457,6 @@
     <string name="profile_sign_out_dialog_body">ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى معلوماتك الصحية.</string>
     <string name="profile_cancel">إلغاء</string>
     <string name="profile_app_version">LungCare AI · الإصدار %1$s</string>
+    <string name="share_ai_button">شارك مع المساعد</string>
+    <string name="share_ai_nothing">مفيش بيانات محفوظة تتشارك. ضيف بيانات الأول.</string>
 </resources>
