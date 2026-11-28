@@ -184,6 +184,13 @@ class MyHealthViewModel : ViewModel() {
                     activeSideEffectCount = care.sideEffects.size,
                     appointments = care.appointments.filter { it.status.name == "UPCOMING" }.map { Appointment(it.id, it.doctor ?: it.title, it.title, it.dateTime, "", it.facility) },
                     treatmentName = care.diagnosis?.title.orEmpty(),
+                    timeline = buildList {
+                        care.diagnosis?.let { add(TimelineEvent(it.id, it.title, it.details, it.confirmedDate ?: it.createdAt, TimelineEventType.DIAGNOSIS)) }
+                        records.forEach { add(TimelineEvent(it.id, it.title, it.type.name, it.date, if (it.type.name == "IMAGING") TimelineEventType.SCAN else TimelineEventType.MILESTONE)) }
+                        symptoms.forEach { add(TimelineEvent(it.id, it.name, "", it.dateLogged, TimelineEventType.SYMPTOM)) }
+                        care.sideEffects.forEach { add(TimelineEvent(it.id, it.name, it.notes.orEmpty(), it.date, TimelineEventType.SYMPTOM)) }
+                        care.milestones.filter { it.isCompleted }.forEach { add(TimelineEvent(it.id, it.title, "", it.dueDate.orEmpty(), TimelineEventType.MILESTONE)) }
+                    }.sortedByDescending { it.date }.take(8),
                     isLoading = false
                 )
             } catch (e: Exception) {
