@@ -20,34 +20,16 @@ interface HealthRepository {
 
 class LocalHealthRepository : HealthRepository {
 
-    private val _symptoms = MutableStateFlow(
-        listOf(
-            SymptomEntry("1", "Persistent Cough", "Moderate", "Today, 10:30 AM"),
-            SymptomEntry("2", "Mild Chest Tightness", "Mild", "Yesterday, 4:15 PM"),
-            SymptomEntry("3", "Shortness of Breath", "Severe", "2 days ago", isUrgent = true)
-        )
-    )
+    private val _symptoms = MutableStateFlow(emptyList<SymptomEntry>())
     override val symptoms: StateFlow<List<SymptomEntry>> = _symptoms.asStateFlow()
 
-    private val _medicalRecords = MutableStateFlow(
-        listOf(
-            MedicalRecord("1", "Chest X-Ray Digital Copy", "Imaging", "Oct 12, 2024", "Patient Uploaded"),
-            MedicalRecord("2", "LDCT Screening Report", "Scan Report", "Sep 04, 2024", "Clinician Confirmed"),
-            MedicalRecord("3", "Pulmonology Consult Notes", "Doctor Notes", "Aug 18, 2024", "Clinician Confirmed")
-        )
-    )
+    private val _medicalRecords = MutableStateFlow(emptyList<MedicalRecord>())
     override val medicalRecords: StateFlow<List<MedicalRecord>> = _medicalRecords.asStateFlow()
 
-    private val _doctorQuestions = MutableStateFlow(
-        listOf(
-            DoctorQuestion("1", "What are the next steps if my LDCT scan shows a small nodule?", "Screening", false),
-            DoctorQuestion("2", "How often do I need follow-up imaging during treatment?", "Treatment", false),
-            DoctorQuestion("3", "Are there specific dietary guidelines I should follow?", "General", true)
-        )
-    )
+    private val _doctorQuestions = MutableStateFlow(emptyList<DoctorQuestion>())
     override val doctorQuestions: StateFlow<List<DoctorQuestion>> = _doctorQuestions.asStateFlow()
 
-    private val _userProfile = MutableStateFlow(UserProfile())
+    private val _userProfile = MutableStateFlow(com.example.myapplication.data.model.currentUserProfile())
     override val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
 
     override suspend fun addSymptom(symptom: SymptomEntry) {

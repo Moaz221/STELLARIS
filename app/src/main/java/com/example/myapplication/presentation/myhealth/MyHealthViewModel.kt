@@ -82,7 +82,7 @@ enum class TimelineEventType {
 // ---------------------------------------------------------------------------
 data class MyHealthUiState(
     val journeyType: JourneyType = JourneyType.EARLY_DETECTION,
-    val userName: String = "Moaz",
+    val userName: String = "",
 
     // Early Detection
     val riskLevel: RiskLevel = RiskLevel.LOW,
@@ -130,71 +130,8 @@ class MyHealthViewModel : ViewModel() {
     }
 
     private fun loadPrototypeData() {
-        _uiState.value = MyHealthUiState(
-            journeyType = JourneyType.EARLY_DETECTION,
-            userName = "Moaz",
-
-            // Early Detection
-            riskLevel = RiskLevel.MODERATE,
-            riskFactors = listOf(
-                RiskFactor("smoking", "Smoking history", true),
-                RiskFactor("family", "Family history of lung disease", true),
-                RiskFactor("exposure", "Occupational exposure", false),
-                RiskFactor("age", "Age over 50", false),
-                RiskFactor("copd", "COPD or chronic lung disease", false)
-            ),
-            riskFactorCount = 2,
-            screeningDue = true,
-            screeningMessage = "Based on your risk factors, consider discussing LDCT screening with your doctor.",
-
-            // Shared
-            recentSymptoms = listOf(
-                SymptomEntry("s1", "Persistent cough", 3, "Dec 10, 2024", false),
-                SymptomEntry("s2", "Mild shortness of breath", 2, "Dec 8, 2024", false),
-                SymptomEntry("s3", "Occasional chest tightness", 1, "Dec 1, 2024", true)
-            ),
-            activeSymptomCount = 2,
-
-            // Under Evaluation
-            recentRecords = listOf(
-                MedicalRecord("r1", "Chest X-Ray", "Imaging", "Dec 5, 2024", "Pending"),
-                MedicalRecord("r2", "Complete Blood Count", "Lab", "Nov 28, 2024", "Normal"),
-                MedicalRecord("r3", "Pulmonary Function Test", "Lab", "Nov 20, 2024", "Abnormal")
-            ),
-            pendingResultsCount = 1,
-            doctorQuestions = listOf(
-                DoctorQuestion("q1", "Should I get an LDCT scan?", false, "Dec 9, 2024"),
-                DoctorQuestion("q2", "What do my PFT results mean?", false, "Dec 7, 2024"),
-                DoctorQuestion("q3", "Is my cough related to allergies?", true, "Nov 25, 2024")
-            ),
-            unansweredCount = 2,
-
-            // Diagnosed
-            treatmentDay = 45,
-            treatmentName = "Chemotherapy Cycle 2",
-            medications = listOf(
-                Medication("m1", "Cisplatin", "75 mg/m²", "Every 3 weeks", "Dec 20, 2024"),
-                Medication("m2", "Ondansetron", "8 mg", "Twice daily", "Today, 8:00 PM"),
-                Medication("m3", "Dexamethasone", "4 mg", "Once daily", "Tomorrow, 8:00 AM")
-            ),
-            sideEffects = listOf(
-                SideEffect("se1", "Nausea", 3, "Dec 11, 2024", "Cisplatin"),
-                SideEffect("se2", "Fatigue", 4, "Dec 10, 2024", null),
-                SideEffect("se3", "Loss of appetite", 2, "Dec 9, 2024", "Cisplatin")
-            ),
-            activeSideEffectCount = 3,
-            appointments = listOf(
-                Appointment("a1", "Dr. Sarah Ahmed", "Oncology", "Dec 18, 2024", "10:00 AM", "Cairo Oncology Center"),
-                Appointment("a2", "Dr. Mohamed Ali", "Pulmonology", "Dec 22, 2024", "2:30 PM", "Dar Al Fouad Hospital")
-            ),
-            timeline = listOf(
-                TimelineEvent("t1", "Diagnosis Confirmed", "Stage II NSCLC confirmed via biopsy", "Nov 1, 2024", TimelineEventType.DIAGNOSIS),
-                TimelineEvent("t2", "Treatment Started", "Chemotherapy Cycle 1 initiated", "Nov 10, 2024", TimelineEventType.TREATMENT_START),
-                TimelineEvent("t3", "CT Scan", "Follow-up imaging scheduled", "Dec 15, 2024", TimelineEventType.SCAN),
-                TimelineEvent("t4", "Cycle 2 Started", "Chemotherapy Cycle 2 initiated", "Dec 1, 2024", TimelineEventType.TREATMENT_START)
-            ),
-
-            isLoading = false
-        )
+        // No demo data: the screen starts empty and shows only what the user saves.
+        val name = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.displayName.orEmpty()
+        _uiState.value = MyHealthUiState(journeyType = JourneyType.EARLY_DETECTION, userName = name)
     }
 }

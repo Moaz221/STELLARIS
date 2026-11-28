@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -119,7 +120,8 @@ private val mainTabs = listOf(
 @Composable
 fun MainScreen(
     onToggleTheme: () -> Unit = {},
-    onToggleLanguage: () -> Unit = {}
+    onToggleLanguage: () -> Unit = {},
+    onSignOut: () -> Unit = {}
 ) {
     // Save simple values instead of the MainTab objects.
     var selectedTabIndex by rememberSaveable {
@@ -198,7 +200,8 @@ fun MainScreen(
                                 selectedTabIndex = MainTab.Health.index
                             },
                             onToggleTheme = onToggleTheme,
-                            onToggleLanguage = onToggleLanguage
+                            onToggleLanguage = onToggleLanguage,
+                            onSignOut = onSignOut
                         )
                     }
                 }
@@ -336,7 +339,8 @@ private fun MainTabContent(
     onOpenOverlay: (OverlayScreen) -> Unit,
     onOpenHealth: () -> Unit,
     onToggleTheme: () -> Unit,
-    onToggleLanguage: () -> Unit
+    onToggleLanguage: () -> Unit,
+    onSignOut: () -> Unit
 ) {
     when (selectedTab) {
         MainTab.Home -> {
@@ -387,7 +391,11 @@ private fun MainTabContent(
         }
 
         MainTab.Profile -> {
+            val profile = remember { com.example.myapplication.data.model.currentUserProfile() }
             ProfileScreen(
+                userName = profile.name,
+                userEmail = profile.email,
+                onSignOut = onSignOut,
                 onToggleTheme = onToggleTheme,
                 onToggleLanguage = onToggleLanguage,
                 onNavigateToDesignPreview = {

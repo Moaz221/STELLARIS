@@ -243,60 +243,7 @@ class SymptomTrackerViewModel : ViewModel() {
     }
 
     private fun loadInitialData() {
-        val initialSymptoms = listOf(
-            TrackedSymptom(
-                id = "s1",
-                name = "Coughing up Blood (Hemoptysis)",
-                category = SymptomCategory.CRITICAL_EMERGENCY,
-                severity = 5,
-                dateLogged = "Today, 09:15 AM",
-                isUrgent = true,
-                isResolved = false,
-                notes = "Noticed streaks of blood in sputum during morning cough.",
-                frequency = "Occasional",
-                triggers = "Morning coughing fit"
-            ),
-            TrackedSymptom(
-                id = "s2",
-                name = "Persistent Cough",
-                category = SymptomCategory.RESPIRATORY,
-                severity = 3,
-                dateLogged = "Yesterday, 04:30 PM",
-                isUrgent = false,
-                isResolved = false,
-                notes = "Dry cough, feels worse in cold air.",
-                frequency = "Frequent",
-                triggers = "Cold air, dust"
-            ),
-            TrackedSymptom(
-                id = "s3",
-                name = "Shortness of Breath",
-                category = SymptomCategory.RESPIRATORY,
-                severity = 3,
-                dateLogged = "Dec 10, 2024",
-                isUrgent = false,
-                isResolved = false,
-                notes = "Shortness of breath after climbing two flights of stairs.",
-                frequency = "Occasional",
-                triggers = "Physical exertion"
-            ),
-            TrackedSymptom(
-                id = "s4",
-                name = "Mild Chest Tightness",
-                category = SymptomCategory.PAIN_CHEST,
-                severity = 1,
-                dateLogged = "Dec 05, 2024",
-                isUrgent = false,
-                isResolved = true,
-                notes = "Resolved after rest.",
-                frequency = "Occasional"
-            )
-        )
-
-        _uiState.value = SymptomTrackerUiState(
-            journeyType = JourneyType.EARLY_DETECTION,
-            symptoms = initialSymptoms
-        )
+        _uiState.value = SymptomTrackerUiState(journeyType = JourneyType.EARLY_DETECTION, symptoms = emptyList())
         reevaluateUrgency()
     }
 }

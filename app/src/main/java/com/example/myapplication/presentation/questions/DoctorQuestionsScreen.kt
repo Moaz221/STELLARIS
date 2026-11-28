@@ -36,13 +36,7 @@ fun DoctorQuestionsScreen(
 ) {
     val p = homePalette()
     var questionsList by remember {
-        mutableStateOf(
-            listOf(
-                QuestionItem("1", "What are the next steps if my LDCT scan shows a small nodule?", "Screening", false),
-                QuestionItem("2", "How often do I need follow-up imaging during treatment?", "Treatment", false),
-                QuestionItem("3", "Are there specific dietary guidelines I should follow?", "General", true)
-            )
-        )
+        mutableStateOf(emptyList<QuestionItem>())
     }
 
     var showDialog by remember { mutableStateOf(false) }

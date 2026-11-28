@@ -84,9 +84,7 @@ fun StellarisNavGraph() {
 
     val scope = rememberCoroutineScope()
 
-    var isDarkTheme by rememberSaveable {
-        mutableStateOf(true)
-    }
+    val isDarkTheme by preferences.isDarkTheme.collectAsState(initial = true)
 
     val locale = remember(currentLanguageCode) { Locale.forLanguageTag(currentLanguageCode) }
     val localizedConfig = remember(currentLanguageCode, configuration) {
@@ -260,8 +258,15 @@ fun StellarisNavGraph() {
 
                 composable(Screen.Home.route) {
                     MainScreen(
+                        onSignOut = {
+                            authRepo.logout()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
                         onToggleTheme = {
-                            isDarkTheme = !isDarkTheme
+                            scope.launch { preferences.setDarkTheme(!isDarkTheme) }
                         },
 
                         onToggleLanguage = {
