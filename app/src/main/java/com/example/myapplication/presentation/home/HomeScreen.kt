@@ -188,6 +188,8 @@ fun HomeScreen(
         label = "glowPulse"
     )
 
+    var showNotifs by remember { mutableStateOf(false) }
+    if (showNotifs) NotificationsDialog(onClose = { showNotifs = false })
     val articles = starterArticles()
     val activeArticle = articles.firstOrNull { it.id == activeArticleId }
     val openArticle: (HomeArticle) -> Unit = { activeArticleId = it.id }
@@ -240,7 +242,7 @@ fun HomeScreen(
                     hasUnreadNotifications = uiState.hasUnreadNotifications,
                     onToggleTheme = onToggleTheme,
                     onToggleLanguage = onToggleLanguage,
-                    onOpenNotifications = onOpenNotifications
+                    onOpenNotifications = { showNotifs = true }
                 )
             }
 
@@ -452,11 +454,7 @@ private fun UserAvatar(
         modifier = Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(
-                Brush.linearGradient(
-                    listOf(p.accent.copy(alpha = 0.25f), p.accentDeep.copy(alpha = 0.2f))
-                )
-            )
+            .background(p.accent.copy(alpha = 0.18f))
             .border(
                 1.5.dp,
                 Brush.linearGradient(listOf(p.accent, p.accentDeep)),
@@ -508,10 +506,8 @@ private fun HeaderCircleButton(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(CircleShape)
-                .background(
-                    Brush.verticalGradient(listOf(p.cardTop, p.cardBottom))
-                )
-                .border(1.dp, p.borderBright.copy(alpha = 0.55f), CircleShape)
+                .background(p.accent.copy(alpha = 0.14f))
+                .border(1.dp, p.accent.copy(alpha = 0.55f), CircleShape)
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
@@ -805,268 +801,100 @@ private fun NextStepCard(
         null -> onOpenQuestions
     }
 
-    GlowCard(
+    // Fixed dark "gaming" hero: same look in light and dark mode, no pale gradients.
+    val heroTop = Color(0xFF060D22)
+    val heroBottom = Color(0xFF0B2150)
+    val neon = Color(0xFF39D0FF)
+    val heroShape = RoundedCornerShape(28.dp)
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = if (enableAnimations) tween(300) else snap()
-            ),
-        shape = RoundedCornerShape(28.dp),
-        glow = true,
-        glowIntensity = 1.2f
+            .clip(heroShape)
+            .background(Brush.linearGradient(listOf(heroTop, heroBottom)))
+            .border(1.5.dp, Brush.linearGradient(listOf(neon, Color(0xFF6A5CFF))), heroShape)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // ===== Layer 1: Animated glow behind lung =====
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .drawBehind {
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                p.accent.copy(alpha = 0.32f * lungPulse),
-                                p.accent.copy(alpha = 0.10f * lungPulse),
-                                Color.Transparent
-                            ),
-                            center = Offset(size.width * 0.82f, size.height * 0.5f),
-                            radius = size.width * 0.65f * lungScale
-                        ),
-                        radius = size.width * 0.65f * lungScale,
-                        center = Offset(size.width * 0.82f, size.height * 0.5f)
-                    )
-                }
-        )
-
-        // ===== Layer 2: Floating particles =====
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                .drawBehind {
-                    val particleColor = p.accent.copy(alpha = 0.4f)
-                    val particles = 6
-                    for (i in 0 until particles) {
-                        val baseY = (i * 0.17f + particleOffset) % 1f
-                        val x = size.width * (0.5f + 0.35f * sin((baseY * 6.28f + i).toDouble()).toFloat())
-                        val y = size.height * (1f - baseY)
-                        val radius = (2.dp.toPx() + (i % 3).dp.toPx()) * (1f - baseY)
-                        drawCircle(
-                            color = particleColor.copy(alpha = (1f - baseY) * 0.5f),
-                            radius = radius,
-                            center = Offset(x, y)
-                        )
-                    }
-                }
-        )
-
-        // ===== Layer 3: Shimmer sweep =====
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .drawBehind {
-                    val shimmerWidth = size.width * 0.4f
-                    val shimmerStart = size.width * shimmerX
-                    drawRect(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                p.accent.copy(alpha = 0.08f),
-                                p.accent.copy(alpha = 0.15f),
-                                p.accent.copy(alpha = 0.08f),
-                                Color.Transparent
-                            ),
-                            start = Offset(shimmerStart, 0f),
-                            end = Offset(shimmerStart + shimmerWidth, size.height)
-                        )
-                    )
-                }
-        )
-
-        // ===== Layer 4: Breathing Lung Illustration =====
-        LungIllustration(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 18.dp, top = 24.dp)
-                .size(width = 130.dp, height = 140.dp)
-                .graphicsLayer {
-                    scaleX = lungScale
-                    scaleY = lungScale
-                    alpha = 0.5f + 0.3f * lungPulse
-                },
-            alpha = 1f
-        )
-
-        // ===== Layer 5: Lung Status Badge =====
-        if (lungStatusPercent != null) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(p.background.copy(alpha = 0.6f))
-                    .border(1.dp, p.borderBright.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalAlignment = Alignment.Start
-            ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(Modifier.size(9.dp).clip(CircleShape).background(neon.copy(alpha = lungPulse)))
+            Text(
+                text = stringResource(R.string.home_next_step).uppercase(),
+                fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp, color = neon,
+                modifier = Modifier.weight(1f)
+            )
+            if (lungStatusPercent != null) {
                 Text(
-                    text = stringResource(R.string.home_lung_status),
-                    fontSize = 9.sp,
-                    letterSpacing = 1.2.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = p.textSecondary
-                )
-                Text(
-                    text = "$lungStatusPercent%",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = p.accent
+                    text = stringResource(R.string.home_lung_status) + " " + lungStatusPercent + "%",
+                    fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White,
+                    modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0x3339D0FF)).padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
         }
-
-        // ===== Layer 6: Main Content =====
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Top label with rotating dot
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .graphicsLayer { rotationZ = dotRotation },
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Outer pulsing ring
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(p.accent.copy(alpha = 0.3f * lungPulse))
-                    )
-                    // Inner dot
-                    Box(
-                        modifier = Modifier
-                            .size(5.dp)
-                            .clip(CircleShape)
-                            .background(p.accent)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(titleRes),
+                    fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, color = Color.White
+                )
+                androidx.compose.animation.Crossfade(targetState = messageIndex, label = "heroMsg") { idx ->
+                    Text(
+                        text = stringResource(rotatingMessages[idx % rotatingMessages.size]),
+                        fontSize = 14.sp, lineHeight = 20.sp, color = Color(0xFFC3DAF2)
                     )
                 }
-                Text(
-                    text = stringResource(R.string.home_next_step).uppercase(),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.8.sp,
-                    color = p.accent
-                )
             }
-
-            // Static title (based on journey)
-            Text(
-                text = stringResource(titleRes),
-                modifier = Modifier.fillMaxWidth(0.72f),
-                fontSize = 26.sp,
-                lineHeight = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = p.textPrimary
-            )
-
-            // ===== Animated Rotating Message =====
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.82f)
-                    .heightIn(min = 44.dp)
-            ) {
-                AnimatedContent(
-                    targetState = messageIndex,
-                    transitionSpec = {
-                        (slideInVertically { it / 2 } + fadeIn(tween(500))) togetherWith
-                                (slideOutVertically { -it / 2 } + fadeOut(tween(400))) using
-                                SizeTransform(clip = false)
-                    },
-                    label = "rotatingMessage"
-                ) { idx ->
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = p.accent.copy(alpha = 0.85f),
-                            modifier = Modifier
-                                .padding(top = 2.dp)
-                                .size(14.dp)
-                        )
-                        Text(
-                            text = stringResource(rotatingMessages[idx]),
-                            fontSize = 13.sp,
-                            lineHeight = 20.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = p.textPrimary.copy(alpha = 0.85f)
-                        )
+            Canvas(Modifier.size(104.dp)) {
+                val c = Offset(size.width / 2, size.height / 2)
+                val r = size.minDimension / 2
+                drawCircle(neon.copy(alpha = 0.10f), radius = r * 0.92f)
+                drawCircle(neon.copy(alpha = 0.55f), radius = r * 0.92f, style = Stroke(2.dp.toPx()))
+                drawCircle(Color(0xFF6A5CFF).copy(alpha = 0.6f), radius = r * 0.70f, style = Stroke(1.dp.toPx()))
+                // orbiting star
+                val ang = Math.toRadians(dotRotation.toDouble())
+                val sx = c.x + (r * 0.92f) * Math.cos(ang).toFloat()
+                val sy = c.y + (r * 0.92f) * Math.sin(ang).toFloat()
+                drawCircle(Color.White, radius = 4.dp.toPx(), center = Offset(sx, sy))
+                drawCircle(neon.copy(alpha = 0.35f), radius = 8.dp.toPx(), center = Offset(sx, sy))
+                // lungs
+                val w = size.width; val h = size.height
+                fun lung(mirror: Boolean): Path {
+                    fun x(v: Float) = if (mirror) w - v * w else v * w
+                    return Path().apply {
+                        moveTo(x(0.47f), h * 0.36f)
+                        cubicTo(x(0.30f), h * 0.34f, x(0.20f), h * 0.52f, x(0.22f), h * 0.66f)
+                        cubicTo(x(0.24f), h * 0.74f, x(0.40f), h * 0.74f, x(0.46f), h * 0.64f)
+                        close()
                     }
                 }
+                val stroke = Stroke(2.5.dp.toPx(), cap = StrokeCap.Round)
+                drawPath(lung(false), neon.copy(alpha = 0.25f * lungPulse + 0.1f))
+                drawPath(lung(true), neon.copy(alpha = 0.25f * lungPulse + 0.1f))
+                drawPath(lung(false), neon, style = stroke)
+                drawPath(lung(true), neon, style = stroke)
+                drawLine(neon, Offset(w * 0.5f, h * 0.22f), Offset(w * 0.5f, h * 0.45f), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
+                drawLine(neon, Offset(w * 0.5f, h * 0.45f), Offset(w * 0.40f, h * 0.52f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                drawLine(neon, Offset(w * 0.5f, h * 0.45f), Offset(w * 0.60f, h * 0.52f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
-
-            // ===== Progress indicator dots =====
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                rotatingMessages.forEachIndexed { index, _ ->
-                    val isActive = index == messageIndex
-                    val dotWidth by animateFloatAsState(
-                        targetValue = if (isActive) 20f else 6f,
-                        animationSpec = tween(400, easing = FastOutSlowInEasing),
-                        label = "dotWidth"
-                    )
-                    val dotAlpha by animateFloatAsState(
-                        targetValue = if (isActive) 1f else 0.35f,
-                        animationSpec = tween(400),
-                        label = "dotAlpha"
-                    )
-                    Box(
-                        modifier = Modifier
-                            .height(6.dp)
-                            .width(dotWidth.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(p.accent.copy(alpha = dotAlpha))
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(6.dp))
-
-            // ===== Action Button =====
-            Button(
-                onClick = onAction,
-                modifier = Modifier.heightIn(min = 48.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = p.accent.copy(alpha = 0.18f),
-                    contentColor = p.accent
-                ),
-                border = BorderStroke(1.2.dp, p.accent.copy(alpha = 0.8f)),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 2.dp
-                )
-            ) {
-                Text(
-                    text = stringResource(actionRes),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            rotatingMessages.indices.forEach { i ->
+                val sel = i == messageIndex % rotatingMessages.size
+                Box(
+                    Modifier.height(6.dp).width(if (sel) 24.dp else 6.dp).clip(RoundedCornerShape(50))
+                        .background(if (sel) neon else Color(0x5539D0FF))
                 )
             }
+        }
+        Button(
+            onClick = onAction,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = neon, contentColor = Color(0xFF04101F)),
+            elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp)
+        ) {
+            Text(text = stringResource(actionRes), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+            Spacer(Modifier.width(8.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
         }
     }
 }

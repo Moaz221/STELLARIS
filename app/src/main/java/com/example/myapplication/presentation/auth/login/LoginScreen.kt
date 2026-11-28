@@ -1,5 +1,6 @@
 package com.example.myapplication.presentation.auth.login
 
+import com.example.myapplication.core.ui.loc
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -92,7 +93,7 @@ fun LoginScreen(
                 AuthTextField(
                     value = state.email,
                     onValueChange = viewModel::onEmailChange,
-                    label = "Email",
+                    label = loc("Email", "البريد الإلكتروني"),
                     icon = Icons.Outlined.Email,
                     keyboardType = KeyboardType.Email,
                 )
@@ -102,7 +103,7 @@ fun LoginScreen(
                 AuthTextField(
                     value = state.password,
                     onValueChange = viewModel::onPasswordChange,
-                    label = "Password",
+                    label = loc("Password", "كلمة المرور"),
                     icon = Icons.Outlined.Lock,
                     isPassword = true,
                     passwordVisible = state.passwordVisible,
@@ -216,7 +217,7 @@ fun LoginScreen(
                         AuthTextField(
                             value = state.resetEmail,
                             onValueChange = viewModel::onResetEmailChange,
-                            label = "Email",
+                            label = loc("Email", "البريد الإلكتروني"),
                             icon = Icons.Outlined.Email,
                             keyboardType = KeyboardType.Email,
                         )

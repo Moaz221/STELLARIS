@@ -91,7 +91,7 @@ class LoginViewModel @JvmOverloads constructor(
     fun sendPasswordResetEmail() {
         val email = _state.value.resetEmail.trim()
         if (!com.example.myapplication.presentation.auth.isValidEmail(email)) {
-            _state.update { it.copy(resetError = "Enter a valid email address") }
+            _state.update { it.copy(resetError = com.example.myapplication.core.ui.locNow("Enter a valid email address", "اكتب بريد إلكتروني صحيح")) }
             return
         }
 

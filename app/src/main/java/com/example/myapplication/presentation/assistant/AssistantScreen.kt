@@ -1,5 +1,7 @@
 package com.example.myapplication.presentation.assistant
 
+import com.example.myapplication.core.ui.locNow
+import com.example.myapplication.core.ui.loc
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -1331,8 +1333,7 @@ private fun AssistantDemoPreview() {
                 scope.launch {
                     delay(1600)
                     messages = messages + ChatMessage(
-                        text = "This is a demo reply so you can see the typing animation word by word. " +
-                                "Real answers will come from your backend once it is connected.",
+                        text = locNow("This is a demo reply so you can see the typing animation word by word. Real answers will come from your backend once it is connected.", "ده رد تجريبي. الردود الحقيقية بتيجي من السيرفر لما يتوصل."),
                         isUser = false,
                         timestamp = System.currentTimeMillis()
                     )

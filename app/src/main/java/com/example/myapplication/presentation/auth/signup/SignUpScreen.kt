@@ -1,5 +1,6 @@
 package com.example.myapplication.presentation.auth.signup
 
+import com.example.myapplication.core.ui.loc
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -102,7 +103,7 @@ fun SignUpScreen(
                     AuthTextField(
                         value = state.name,
                         onValueChange = viewModel::onNameChange,
-                        label = "Full name",
+                        label = loc("Full name", "الاسم الكامل"),
                         icon = Icons.Outlined.Person,
                     )
 
@@ -111,7 +112,7 @@ fun SignUpScreen(
                     AuthTextField(
                         value = state.email,
                         onValueChange = viewModel::onEmailChange,
-                        label = "Email",
+                        label = loc("Email", "البريد الإلكتروني"),
                         icon = Icons.Outlined.Email,
                         keyboardType = KeyboardType.Email,
                     )
@@ -121,7 +122,7 @@ fun SignUpScreen(
                     AuthTextField(
                         value = state.password,
                         onValueChange = viewModel::onPasswordChange,
-                        label = "Password (min 6 chars)",
+                        label = loc("Password (min 6 chars)", "كلمة المرور (6 أحرف على الأقل)"),
                         icon = Icons.Outlined.Lock,
                         isPassword = true,
                         passwordVisible = state.passwordVisible,

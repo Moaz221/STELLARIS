@@ -1,5 +1,6 @@
 package com.example.myapplication.presentation.onboarding.components
 
+import com.example.myapplication.core.ui.loc
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -72,7 +73,7 @@ fun OnboardingButton(
             } else {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next",
+                    contentDescription = loc("Next", "التالي"),
                     tint = DeepSpace
                 )
             }
