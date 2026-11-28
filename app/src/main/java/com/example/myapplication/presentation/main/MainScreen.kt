@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.presentation.assistant.AssistantFlow
 import com.example.myapplication.presentation.care.CareJourneyScreen
-import com.example.myapplication.presentation.design.DesignSystemPreviewScreen
 import com.example.myapplication.presentation.symptoms.SymptomTrackerScreen
 import com.example.myapplication.presentation.education.EducationHubScreen
 import com.example.myapplication.presentation.home.HomeScreen
@@ -106,7 +105,6 @@ enum class OverlayScreen {
     RISK_ASSESSMENT,
     DOCTOR_QUESTIONS,
     EDUCATION_HUB,
-    DESIGN_SYSTEM_PREVIEW,
     SYMPTOMS_TRACKER,
     RECORDS,
     ASSISTANT
@@ -472,10 +470,6 @@ private fun OverlayContent(
 
         OverlayScreen.EDUCATION_HUB -> {
             EducationHubScreen(onBack = onBack)
-        }
-
-        OverlayScreen.DESIGN_SYSTEM_PREVIEW -> {
-            DesignSystemPreviewScreen(onBack = onBack)
         }
 
         OverlayScreen.SYMPTOMS_TRACKER -> {

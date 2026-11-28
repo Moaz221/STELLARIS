@@ -112,6 +112,19 @@ fun DoctorQuestionsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (questionsList.isEmpty()) {
+                item {
+                    Text(
+                        text = com.example.myapplication.core.ui.loc(
+                            "No questions yet. Tap Add to write what you want to ask your doctor.",
+                            "لسه مفيش أسئلة. اضغط إضافة واكتب اللي عايز تسأل عنه الدكتور."
+                        ),
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth().padding(24.dp)
+                    )
+                }
+            }
             items(questionsList) { item ->
                 LungCareCard(
                     backgroundColor = MaterialTheme.colorScheme.surface,

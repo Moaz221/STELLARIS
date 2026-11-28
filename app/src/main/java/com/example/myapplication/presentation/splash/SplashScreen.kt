@@ -359,7 +359,7 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "INITIALIZING DIAGNOSTIC ENGINE",
+                text = if (java.util.Locale.getDefault().language == "ar") "جاري تشغيل محرك التشخيص" else "INITIALIZING DIAGNOSTIC ENGINE",
                 color = StellarCyan.copy(alpha = 0.55f + 0.25f * tagAlpha),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
@@ -369,7 +369,7 @@ fun SplashScreen(
             Spacer(Modifier.height(14.dp))
 
             Text(
-                text = "AI-POWERED\nCHEST X-RAY ANALYSIS",
+                text = if (java.util.Locale.getDefault().language == "ar") "تحليل أشعة الصدر\nبالذكاء الاصطناعي" else "AI-POWERED\nCHEST X-RAY ANALYSIS",
                 color = Color(0xFFD7EEF5),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -438,7 +438,7 @@ fun SplashScreen(
                     .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "TAP TO SKIP",
+                    text = if (java.util.Locale.getDefault().language == "ar") "اضغط للتخطي" else "TAP TO SKIP",
                     color = Color.White.copy(alpha = 0.72f),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Medium,
