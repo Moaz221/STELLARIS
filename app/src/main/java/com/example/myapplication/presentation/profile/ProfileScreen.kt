@@ -321,12 +321,7 @@ fun ProfileScreen(
             // 5) الإعدادات
             Entrance(index = 4, animate = animate) {
                 val entries = listOf(
-                    SettingsEntry(Icons.Outlined.Person, R.string.profile_item_personal_title, R.string.profile_item_personal_subtitle, onPersonalInfo),
-                    SettingsEntry(Icons.Outlined.Notifications, R.string.profile_item_notifications_title, R.string.profile_item_notifications_subtitle, onNotifications),
-                    SettingsEntry(Icons.Outlined.Shield, R.string.profile_item_privacy_title, R.string.profile_item_privacy_subtitle, onPrivacy),
-                    SettingsEntry(Icons.Outlined.Lock, R.string.profile_item_security_title, R.string.profile_item_security_subtitle, onSecurity),
-                    SettingsEntry(Icons.Outlined.Palette, R.string.profile_item_design_title, R.string.profile_item_design_subtitle, onNavigateToDesignPreview),
-                    SettingsEntry(Icons.Outlined.SupportAgent, R.string.profile_item_help_title, R.string.profile_item_help_subtitle, onHelp)
+                    SettingsEntry(Icons.Outlined.Palette, R.string.profile_item_design_title, R.string.profile_item_design_subtitle, onNavigateToDesignPreview)
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SectionTitle(stringResource(R.string.profile_section_settings))

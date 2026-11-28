@@ -405,6 +405,7 @@ private fun MainTabContent(
 
         MainTab.Health -> {
             MyHealthScreen(
+                onNavigateToRecords = { onOpenOverlay(OverlayScreen.RECORDS) },
                 onNavigateToSymptoms = {
                     onOpenOverlay(OverlayScreen.SYMPTOMS_TRACKER)
                 },
@@ -439,7 +440,7 @@ private fun MainTabContent(
                 onToggleTheme = onToggleTheme,
                 onToggleLanguage = onToggleLanguage,
                 onNavigateToDesignPreview = {
-                    onOpenOverlay(OverlayScreen.DESIGN_SYSTEM_PREVIEW)
+                    onOpenOverlay(OverlayScreen.RECORDS)
                 }
             )
         }

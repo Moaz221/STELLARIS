@@ -444,8 +444,8 @@
     <string name="profile_item_privacy_subtitle">Data use and permissions</string>
     <string name="profile_item_security_title">Account security</string>
     <string name="profile_item_security_subtitle">Password and sign-in</string>
-    <string name="profile_item_design_title">Design system</string>
-    <string name="profile_item_design_subtitle">Components, color, type, and states</string>
+    <string name="profile_item_design_title">Medical records</string>
+    <string name="profile_item_design_subtitle">Your tests, scans and visit notes</string>
     <string name="profile_item_help_title">Help &amp; support</string>
     <string name="profile_item_help_subtitle">Guidance and feedback</string>
     <string name="profile_sign_out">Sign Out</string>

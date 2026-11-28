@@ -448,8 +448,8 @@
     <string name="profile_item_privacy_subtitle">استخدام البيانات والأذونات</string>
     <string name="profile_item_security_title">أمان الحساب</string>
     <string name="profile_item_security_subtitle">كلمة المرور وتسجيل الدخول</string>
-    <string name="profile_item_design_title">نظام التصميم</string>
-    <string name="profile_item_design_subtitle">المكوّنات، الألوان، الخطوط، والحالات</string>
+    <string name="profile_item_design_title">السجلات الطبية</string>
+    <string name="profile_item_design_subtitle">تحاليلك وأشعتك وملاحظات الزيارات</string>
     <string name="profile_item_help_title">المساعدة والدعم</string>
     <string name="profile_item_help_subtitle">الإرشادات والملاحظات</string>
     <string name="profile_sign_out">تسجيل الخروج</string>
