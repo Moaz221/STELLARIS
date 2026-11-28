@@ -226,6 +226,12 @@ fun MainScreen(
                         kind == OverlayScreen.DOCTOR_QUESTIONS || kind == OverlayScreen.RECORDS
                     ) {
                         com.example.myapplication.core.ui.ShareWithAssistantButton(
+                            bubble = when (kind) {
+                                OverlayScreen.SYMPTOMS_TRACKER -> com.example.myapplication.core.ui.loc("Send me your symptoms and ask me about them", "ابعتلي أعراضك واسألني عنها")
+                                OverlayScreen.RISK_ASSESSMENT -> com.example.myapplication.core.ui.loc("Send me your risk result and ask me about it", "ابعتلي نتيجة تقييم المخاطر واسألني عنها")
+                                OverlayScreen.DOCTOR_QUESTIONS -> com.example.myapplication.core.ui.loc("Send me your questions and I will help you prepare", "ابعتلي أسئلتك وأنا أساعدك تجهز لزيارة الدكتور")
+                                else -> com.example.myapplication.core.ui.loc("Send me your records and ask me about them", "ابعتلي سجلاتك واسألني عنها")
+                            },
                             onClick = {
                                 shareScope.launch {
                                     val text = when (kind) {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import com.example.myapplication.core.ui.*
 import androidx.compose.material3.*
@@ -39,6 +40,8 @@ fun CareManagerDialog(
     var extra by remember { mutableStateOf("") }
     var severity by remember { mutableStateOf(SideEffectSeverity.MILD) }
     var error by remember { mutableStateOf<String?>(null) }
+    var editingId by remember { mutableStateOf<String?>(null) }
+    var editingDate by remember { mutableStateOf<String?>(null) }
 
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
@@ -55,15 +58,23 @@ fun CareManagerDialog(
             val rows: List<Triple<String, String, String>> = when (kind) {
                 "appointment" -> data.appointments.map { Triple(it.id, it.title, "${it.dateTime} ${it.facility}") }
                 "medication" -> data.medications.map { Triple(it.id, it.name, (it.reminderTimes.joinToString(", ") + " " + it.instructions).trim()) }
-                else -> data.sideEffects.map { Triple(it.id, it.name, "${it.severity} ${it.date}") }
+                else -> data.sideEffects.map { Triple(it.id, it.name, when (it.severity) { SideEffectSeverity.MILD -> tr("Mild", "خفيف"); SideEffectSeverity.MODERATE -> tr("Moderate", "متوسط"); else -> tr("Severe", "شديد") } + " · " + it.date) }
             }
             Text(tr("Saved", "المحفوظ"), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = p.textPrimary)
             if (rows.isEmpty()) {
                 Text(tr("Nothing added yet.", "لسه مفيش حاجة مضافة."), fontSize = 14.sp, color = p.textSecondary)
             }
             rows.forEach { (id, t, sub) ->
-                Surface(shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp), color = p.surface,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, p.border)) {
+                Surface(shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp), color = if (editingId == id) p.elevated else p.surface,
+                    border = androidx.compose.foundation.BorderStroke(if (editingId == id) 2.dp else 1.dp, if (editingId == id) p.primary else p.border),
+                    onClick = {
+                        error = null; editingId = id; editingDate = null
+                        when (kind) {
+                            "appointment" -> data.appointments.firstOrNull { it.id == id }?.let { title = it.title; detail = it.dateTime; extra = it.facility }
+                            "medication" -> data.medications.firstOrNull { it.id == id }?.let { title = it.name; detail = it.instructions; extra = it.reminderTimes.joinToString(", ") }
+                            else -> data.sideEffects.firstOrNull { it.id == id }?.let { title = it.name; severity = it.severity; detail = it.notes ?: ""; editingDate = it.date }
+                        }
+                    }) {
                     Row(Modifier.padding(start = 14.dp, top = 6.dp, bottom = 6.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text(t, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = p.textPrimary)
@@ -76,7 +87,13 @@ fun CareManagerDialog(
                 }
             }
             HorizontalDivider(color = p.border)
-            Text(tr("Add new", "إضافة جديد"), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = p.textPrimary)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(if (editingId != null) tr("Edit entry", "تعديل") else tr("Add new", "إضافة جديد"), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = p.textPrimary, modifier = Modifier.weight(1f))
+                TextButton(onClick = { editingId = null; editingDate = null; title = ""; detail = ""; extra = ""; severity = SideEffectSeverity.MILD; error = null }) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Text(tr("Add new", "إضافة جديد"))
+                }
+            }
         }
         AppField(title, { title = it }, singleLine = true,
             label = when (kind) { "appointment" -> tr("Title (e.g. Chest clinic)", "العنوان (مثلا عيادة صدر)"); "medication" -> tr("Medicine name", "اسم الدواء"); "diagnosis" -> tr("Diagnosis (as written by your doctor)", "التشخيص (زي ما كتبه الدكتور)"); else -> tr("Side effect", "العرض الجانبي") })
@@ -115,25 +132,25 @@ fun CareManagerDialog(
             }
         }
         error?.let { Text(it, color = p.urgent, fontSize = 14.sp, fontWeight = FontWeight.Medium) }
-        AppPrimaryButton(text = if (kind == "diagnosis") tr("Save", "حفظ") else tr("Add", "إضافة"), onClick = {
+        AppPrimaryButton(text = if (kind == "diagnosis" || editingId != null) tr("Save", "حفظ") else tr("Add", "إضافة"), onClick = {
             error = null
             if (title.isBlank()) { error = tr("Enter a name.", "اكتب الاسم."); return@AppPrimaryButton }
             when (kind) {
                 "appointment" -> {
                     if (detail.isBlank()) { error = tr("Enter date and time.", "اكتب التاريخ والوقت."); return@AppPrimaryButton }
-                    viewModel.addAppointment(title.trim(), extra.trim(), detail.trim(), "")
+                    viewModel.addAppointment(title.trim(), extra.trim(), detail.trim(), "", editingId)
                 }
                 "medication" -> {
                     val times = extra.split(",").map { it.trim() }.filter { it.isNotEmpty() }
                     val ok = times.all { t -> Regex("^([01]?\\d|2[0-3]):[0-5]\\d$").matches(t) }
                     if (!ok) { error = tr("Times must look like 08:00 or 20:30.", "الوقت لازم يبقى زي 08:00 أو 20:30."); return@AppPrimaryButton }
-                    viewModel.addMedication(title.trim(), detail.trim(), times)
+                    viewModel.addMedication(title.trim(), detail.trim(), times, editingId)
                     if (times.isNotEmpty() && Build.VERSION.SDK_INT >= 33 && !ReminderScheduler.canNotify(context)) {
                         permission.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                 }
                 "diagnosis" -> viewModel.setDiagnosis(title.trim(), detail.trim(), extra.trim())
-                else -> viewModel.addSideEffect(title.trim(), severity, detail.trim())
+                else -> viewModel.addSideEffect(title.trim(), severity, detail.trim(), editingId, editingDate)
             }
             android.widget.Toast.makeText(context, tr("Saved", "تم الحفظ"), android.widget.Toast.LENGTH_SHORT).show()
             onDismiss()

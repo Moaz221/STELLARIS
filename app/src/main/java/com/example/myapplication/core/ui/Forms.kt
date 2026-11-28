@@ -1,6 +1,10 @@
 package com.example.myapplication.core.ui
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -137,22 +141,53 @@ fun appFieldColors(): TextFieldColors {
     )
 }
 
-/** Animated "Share with assistant" pill with the looping robot animation. Sends nothing by itself. */
+/**
+ * Round floating robot button. Tap = manual share with the assistant (nothing is sent by itself).
+ * A speech bubble fades in for a few seconds every ~20s. The button can be dragged away from content.
+ */
 @Composable
-fun ShareWithAssistantButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ShareWithAssistantButton(bubble: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val p = lungCarePalette()
-    val shape = RoundedCornerShape(30.dp)
-    Row(
+    var show by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var dx by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0f) }
+    var dy by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0f) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(1500)
+        while (true) {
+            show = true
+            kotlinx.coroutines.delay(5000)
+            show = false
+            kotlinx.coroutines.delay(20000)
+        }
+    }
+    Column(
         modifier = modifier
-            .clip(shape)
-            .background(Brush.horizontalGradient(listOf(p.primary, p.info)))
-            .border(1.5.dp, p.onPrimary.copy(alpha = 0.35f), shape)
-            .clickable(onClick = onClick)
-            .padding(start = 6.dp, end = 18.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .offset { androidx.compose.ui.unit.IntOffset(dx.toInt(), dy.toInt()) }
+            .pointerInput(Unit) { detectDragGestures { change, drag -> change.consume(); dx += drag.x; dy += drag.y } },
+        horizontalAlignment = Alignment.End
     ) {
-        RobotFace(Modifier.size(40.dp))
-        Spacer(Modifier.width(4.dp))
-        Text(loc("Share with assistant", "شارك مع المساعد"), color = p.onPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        androidx.compose.animation.AnimatedVisibility(
+            visible = show,
+            enter = androidx.compose.animation.fadeIn(),
+            exit = androidx.compose.animation.fadeOut()
+        ) {
+            Surface(
+                shape = RoundedCornerShape(16.dp), color = p.surface,
+                border = BorderStroke(1.dp, p.primary), modifier = Modifier.widthIn(max = 230.dp).padding(bottom = 8.dp)
+            ) {
+                Text(bubble, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), color = p.textPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+            }
+        }
+        Box(
+            modifier = Modifier
+                .size(58.dp)
+                .clip(androidx.compose.foundation.shape.CircleShape)
+                .background(Color(0xFF0B2150))
+                .border(2.dp, Color(0xFF39D0FF), androidx.compose.foundation.shape.CircleShape)
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            RobotFace(Modifier.size(40.dp))
+        }
     }
 }
