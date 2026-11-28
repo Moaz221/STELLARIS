@@ -43,11 +43,6 @@ fun AuthHeader(
     subtitle: String,
     modifier: Modifier = Modifier
 ) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.chat_bot))
-    val progress by animateLottieCompositionAsState(
-        composition = composition,
-        iterations = LottieConstants.IterateForever
-    )
 
     val pulse = rememberInfiniteTransition(label = "pulse")
     val glowScale by pulse.animateFloat(
@@ -73,11 +68,7 @@ fun AuthHeader(
                         CircleShape
                     )
             )
-            LottieAnimation(
-                composition = composition,
-                progress = { progress },
-                modifier = Modifier.size(170.dp)
-            )
+            com.example.myapplication.core.ui.RobotFace(modifier = Modifier.size(170.dp))
         }
 
         Spacer(Modifier.height(16.dp))

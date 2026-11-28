@@ -18,7 +18,7 @@ private fun t(en: String, a: String) = if (ar()) a else en
 
 val onboardingPages: List<OnboardingPage> get() = listOf(
     OnboardingPage(
-        lottieRes = R.raw.robot_wave,
+        lottieRes = 0,
         kicker = t("YOUR AI COMPANION", "رفيقك الذكي"),
         title = t("Meet STELLARIS", "تعرّف على STELLARIS"),
         description = t("An intelligent assistant for chest X-ray analysis — fast, precise, always with you.", "مساعد ذكي لتحليل أشعة الصدر، سريع ودقيق ومعاك دايمًا."),
@@ -32,7 +32,7 @@ val onboardingPages: List<OnboardingPage> get() = listOf(
         accentColor = StellarCyan
     ),
     OnboardingPage(
-        lottieRes = R.raw.robot_chat,
+        lottieRes = -1,
         kicker = t("MEDICAL CHATBOT", "المساعد الطبي"),
         title = t("Just Ask", "اسأل بس"),
         description = t("Chat with STELLARIS to understand your results in simple, clear words.", "اتكلم مع STELLARIS وافهم نتايجك بكلمات بسيطة وواضحة."),

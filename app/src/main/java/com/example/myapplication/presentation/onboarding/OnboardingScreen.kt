@@ -162,7 +162,7 @@ private fun CinematicPage(
         StarfieldBackground(starCount = 36, scan = false)
 
         // 🎬 الأنيميشن: كبير ومتوسّط في النص العلوي
-        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(page.lottieRes))
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(if (page.lottieRes > 0) page.lottieRes else com.example.myapplication.R.raw.ai_scan))
         val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
 
         Box(
@@ -198,7 +198,9 @@ private fun CinematicPage(
                     )
             )
 
-            LottieAnimation(
+            if (page.lottieRes <= 0) {
+                com.example.myapplication.core.ui.RobotFace(modifier = Modifier.fillMaxSize(), thinking = page.lottieRes < 0)
+            } else LottieAnimation(
                 composition = composition,
                 progress = { progress },
                 contentScale = ContentScale.Fit,
