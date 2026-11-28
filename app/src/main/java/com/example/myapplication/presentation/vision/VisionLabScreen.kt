@@ -301,62 +301,67 @@ fun VisionLabScreen(
                 enter = fadeIn() + slideInVertically { it / 3 }
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp), color = p.primary.copy(alpha = 0.10f),
-                        border = BorderStroke(1.5.dp, p.primary.copy(alpha = 0.7f))
-                    ) {
-                        Row(Modifier.padding(14.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = p.primary, modifier = Modifier.size(28.dp))
-                            Column {
-                                Text(stringResource(R.string.analysis_results), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = p.textPrimary)
-                                Text(loc("Analysis complete. Review the highlighted areas with your doctor.", "اكتمل التحليل. راجع المناطق المميزة مع دكتورك."), fontSize = 12.sp, color = p.textSecondary)
+                    val abnormal = (state.prediction ?: "").uppercase().contains("ABNORMAL")
+                    val conf = state.confidence ?: 0.0
+                    // raw_score is the probability of "abnormal" (verified: NORMAL results show confidence = 1 - raw_score)
+                    val abProb = (state.rawScore ?: if (abnormal) conf else 1.0 - conf).coerceIn(0.0, 1.0)
+                    val uncertain = !abnormal && abProb >= 0.35
+                    val tint = when { abnormal -> p.urgent; uncertain -> p.warning; else -> p.success }
+                    val headline = when {
+                        abnormal -> loc("Possible abnormality detected. Please see a doctor.", "تم رصد علامات محتملة غير طبيعية. من فضلك راجع دكتور.")
+                        uncertain -> loc("No clear signs found, but the result is not certain.", "مفيش علامات واضحة، لكن النتيجة مش مؤكدة.")
+                        else -> loc("No signs that need a doctor's review were detected.", "لم يتم رصد علامات تحتاج مراجعة دكتور.")
+                    }
+                    val explain = when {
+                        abnormal -> loc("The AI model found patterns in this X-ray that look different from a typical normal chest X-ray. This is a screening result, not a diagnosis. It cannot tell which condition it is, and it can be wrong.",
+                            "النموذج لقى أنماط في الأشعة دي شكلها مختلف عن أشعة الصدر الطبيعية. ده نتيجة فحص أولي مش تشخيص. النموذج مش بيقدر يحدد إيه الحالة، وممكن يغلط.")
+                        uncertain -> loc("The model leaned towards normal, but only slightly. Treat this as inconclusive. A doctor should look at the original X-ray, especially if you have symptoms.",
+                            "النموذج مال للطبيعي لكن بفارق بسيط. اعتبر النتيجة غير حاسمة. الدكتور لازم يشوف الأشعة الأصلية، خصوصاً لو عندك أعراض.")
+                        else -> loc("The AI model did not find patterns that need review. This does not prove that your lungs are healthy. It is a screening aid, and it can miss things.",
+                            "النموذج مالقاش أنماط محتاجة مراجعة. ده مش معناه إن رئتك سليمة تماماً. ده مساعد فحص أولي وممكن يفوّت حاجات.")
+                    }
+                    val nextStep = when {
+                        abnormal -> loc("Next step: show this X-ray to a doctor (a chest specialist if possible) in the next few days. Go to urgent care now if you have severe shortness of breath, chest pain or you cough up blood.",
+                            "الخطوة الجاية: اعرض الأشعة دي على دكتور (يفضل صدرية) في الأيام الجاية. روح الطوارئ فوراً لو عندك ضيق نفس شديد أو ألم في الصدر أو كحة بدم.")
+                        uncertain -> loc("Next step: share the X-ray with a doctor, and see one soon if you have a cough that lasts, fever, weight loss or shortness of breath.",
+                            "الخطوة الجاية: اعرض الأشعة على دكتور، وروح قريب لو عندك كحة مستمرة أو حرارة أو نزول وزن أو ضيق نفس.")
+                        else -> loc("Next step: no action needed from this result alone. If you have a cough that lasts, fever, chest pain or shortness of breath, see a doctor anyway.",
+                            "الخطوة الجاية: مفيش إجراء مطلوب من النتيجة دي لوحدها. ولو عندك كحة مستمرة أو حرارة أو ألم صدر أو ضيق نفس، روح لدكتور برضه.")
+                    }
+                    Surface(shape = RoundedCornerShape(16.dp), color = tint.copy(alpha = 0.10f), border = BorderStroke(1.5.dp, tint.copy(alpha = 0.8f))) {
+                        Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Icon(if (abnormal || uncertain) Icons.Default.Warning else Icons.Default.CheckCircle, contentDescription = null, tint = tint, modifier = Modifier.size(28.dp))
+                                Text(headline, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = p.textPrimary, lineHeight = 24.sp, modifier = Modifier.weight(1f))
                             }
+                            Text(explain, fontSize = 13.sp, color = p.textPrimary, lineHeight = 19.sp)
+                            Text(loc("Chance of abnormal signs (model estimate)", "احتمال وجود علامات غير طبيعية (تقدير النموذج)") + ": ${(abProb * 100).toInt()}%", fontSize = 12.sp, color = p.textSecondary)
+                            LinearProgressIndicator(progress = { abProb.toFloat() }, color = tint, trackColor = p.border, modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)))
+                            Text(loc("The model decides between normal and abnormal only. It does not name a disease.", "النموذج بيفرّق بين طبيعي وغير طبيعي بس. مش بيحدد اسم مرض."), fontSize = 11.sp, color = p.textSecondary)
                         }
                     }
-
-                    // Grad-CAM overlay
-                    state.gradcamBase64?.let { b64 ->
-                        ResultImageCard(
-                            title = stringResource(R.string.gradcam_title),
-                            subtitle = stringResource(R.string.gradcam_subtitle),
-                            base64 = b64,
-                            p = p
-                        )
+                    Surface(shape = RoundedCornerShape(14.dp), color = p.surface, border = BorderStroke(1.dp, p.border)) {
+                        Text(nextStep, fontSize = 13.sp, color = p.textPrimary, lineHeight = 19.sp, modifier = Modifier.padding(14.dp).fillMaxWidth())
                     }
 
-                    state.overlayBase64?.let { b64 ->
-                        ResultImageCard(
-                            title = loc("Overlay", "الصورة مع التظليل"),
-                            subtitle = loc("The X-ray with the model's highlighted area", "الأشعة مع المنطقة اللي ركّز عليها النموذج"),
-                            base64 = b64, p = p
-                        )
+                    var showDetails by remember { mutableStateOf(false) }
+                    OutlinedButton(onClick = { showDetails = !showDetails }, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (showDetails) loc("Hide details", "إخفاء التفاصيل") else loc("Show details (highlighted areas)", "عرض التفاصيل (المناطق المميزة)"))
                     }
-
-                    // Segmentation overlay
-                    state.segmentationOverlayBase64?.let { b64 ->
-                        ResultImageCard(
-                            title = stringResource(R.string.segmentation_title),
-                            subtitle = stringResource(R.string.segmentation_subtitle),
-                            base64 = b64,
-                            p = p
-                        )
-                    }
-
-                    // Finding + confidence
-                    state.confidence?.let { conf ->
-                        val pct = (conf * 100).toInt().coerceIn(0, 100)
-                        val abnormal = (state.prediction ?: "").uppercase().contains("ABNORMAL")
-                        val tint = if (abnormal) p.warning else p.primary
-                        Surface(shape = RoundedCornerShape(16.dp), color = p.surface, border = BorderStroke(1.5.dp, tint.copy(alpha = 0.7f))) {
-                            Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(
-                                    if (abnormal) loc("Possible finding detected", "تم رصد نتيجة محتملة") else loc("No clear finding detected", "لم يتم رصد نتيجة واضحة"),
-                                    fontSize = 17.sp, fontWeight = FontWeight.Bold, color = tint
-                                )
-                                Text(loc("Model confidence", "درجة ثقة النموذج") + ": $pct%", fontSize = 13.sp, color = p.textPrimary)
-                                LinearProgressIndicator(progress = { conf.toFloat().coerceIn(0f, 1f) }, color = tint, trackColor = p.border, modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)))
-                                Text(loc("This is an automated visual aid. Only a doctor can interpret an X-ray.", "ده مساعد بصري آلي. بس الدكتور هو اللي يقدر يفسر الأشعة."), fontSize = 11.sp, color = p.textSecondary)
-                            }
+                    if (showDetails) {
+                        state.gradcamBase64?.let { b64 ->
+                            ResultImageCard(
+                                title = loc("Attention map", "خريطة الانتباه"),
+                                subtitle = loc("Warm colors (red, yellow) show where the model looked most when deciding. It shows attention, not a confirmed problem.", "الألوان الدافية (الأحمر والأصفر) بتوضح المكان اللي النموذج ركز عليه أكتر. دي خريطة انتباه مش مشكلة مؤكدة."),
+                                base64 = b64, p = p
+                            )
+                        }
+                        state.segmentationOverlayBase64?.let { b64 ->
+                            ResultImageCard(
+                                title = loc("Lung outline", "حدود الرئتين"),
+                                subtitle = loc("The green line shows the lung area the model detected on your image. It is only an outline.", "الخط الأخضر بيوضح منطقة الرئتين اللي النموذج حددها في صورتك. ده مجرد حدود."),
+                                base64 = b64, p = p
+                            )
                         }
                     }
 

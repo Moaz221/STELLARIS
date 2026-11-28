@@ -32,6 +32,7 @@ data class VisionState(
     val prediction: String? = null,
     val visualFinding: String? = null,
     val confidence: Double? = null,
+    val rawScore: Double? = null,
     val overlayBase64: String? = null,
     val errorKind: String? = null,   // NETWORK | TIMEOUT | BAD_IMAGE | SERVER | OTHER
     /** 0 uploading, 1 analyzing, 2 preparing result. Time-based estimate, not real server progress. */
@@ -84,6 +85,7 @@ class VisionViewModel @JvmOverloads constructor(
                             prediction = data.prediction,
                             visualFinding = data.visualFinding,
                             confidence = data.confidence,
+                            rawScore = data.rawScore,
                             overlayBase64 = data.overlayBase64,
                         )
                     }
