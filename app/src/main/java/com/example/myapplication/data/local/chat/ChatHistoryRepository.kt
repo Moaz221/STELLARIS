@@ -63,6 +63,8 @@ class ChatHistoryRepository(private val database: ChatDatabase) {
 
     suspend fun deleteAll() = dao.deleteAll()
 
+    suspend fun rename(id: String, title: String) = dao.rename(id, title.trim())
+
     private fun buildTitle(firstUserText: String): String {
         val cleaned = firstUserText.trim().replace(Regex("\\s+"), " ")
         if (cleaned.length <= MAX_TITLE_LENGTH) return cleaned
@@ -70,7 +72,7 @@ class ChatHistoryRepository(private val database: ChatDatabase) {
         var cut = cleaned.take(MAX_TITLE_LENGTH)
         // ما نقطعش في نص emoji (surrogate pair)
         if (cut.isNotEmpty() && cut.last().isHighSurrogate()) cut = cut.dropLast(1)
-        return cut.trimEnd() + "…"
+        return cut.trimEnd()
     }
 
     private companion object {

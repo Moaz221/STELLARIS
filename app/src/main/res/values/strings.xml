@@ -120,7 +120,7 @@
     <string name="gradcam_subtitle">Shows which regions the AI focused on — not a diagnosis</string>
     <string name="segmentation_title">Lung Segmentation</string>
     <string name="segmentation_subtitle">AI-detected lung boundaries — for educational review only</string>
-    <string name="ai_not_diagnosis">⚠️ AI-generated educational output — NOT a medical diagnosis. Share these images with your clinician for professional interpretation.</string>
+    <string name="ai_not_diagnosis">AI-generated educational output — NOT a medical diagnosis. Share these images with your clinician for professional interpretation.</string>
     <string name="image_decode_error">Could not display image</string>
     <string name="try_again">Try Again</string>
     <string name="back">Back</string>
@@ -150,7 +150,7 @@
     <string name="ask_placeholder">Ask a question…</string>
     <string name="assistant_status_online">Online · Educational assistant</string>
     <string name="assistant_status_typing">Typing…</string>
-    <string name="assistant_welcome_title">Hi %1$s 🫩</string>
+    <string name="assistant_welcome_title">Hi %1$s</string>
     <string name="assistant_welcome_body">Ask me about lung health, screening, or preparing for your clinic visit.</string>
     <string name="assistant_prompt_eligibility">Who is eligible for LDCT screening?</string>
     <string name="assistant_prompt_symptoms">What early symptoms should I watch for?</string>
@@ -171,7 +171,7 @@
     <string name="chat_new_chat">New chat</string>
     <string name="chat_default_user_name">there</string>
     <string name="chat_loading_conversation">Loading conversation</string>
-    <string name="chat_emergency_message">⚠️ Urgent medical warning: the symptoms you described (such as coughing up blood or severe difficulty breathing) need immediate medical evaluation. Please go to the nearest emergency department. Do not rely on this assistant.</string>
+    <string name="chat_emergency_message">Urgent medical warning: the symptoms you described (such as coughing up blood or severe difficulty breathing) need immediate medical evaluation. Please go to the nearest emergency department. Do not rely on this assistant.</string>
     <string name="chat_error_server">Error (%1$s): %2$s</string>
     <string name="chat_error_interrupted">This message did not get a reply.</string>
 
@@ -330,7 +330,7 @@
     <string name="symptom_tracker_log_symptom">Log Symptom</string>
     <string name="symptom_tracker_filter_all">All Logs</string>
     <string name="symptom_tracker_filter_active">Active</string>
-    <string name="symptom_tracker_filter_urgent">Urgent / Severe 🚨</string>
+    <string name="symptom_tracker_filter_urgent">Urgent / Severe</string>
     <string name="symptom_tracker_filter_resolved">Resolved</string>
     <string name="symptom_tracker_stats_active">Active</string>
     <string name="symptom_tracker_stats_urgent">Urgent</string>

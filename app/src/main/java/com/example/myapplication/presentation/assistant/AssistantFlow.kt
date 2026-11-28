@@ -63,6 +63,7 @@ fun AssistantFlow(onBack: () -> Unit) {
                     assistantViewModel.startNewConversation()
                     showHistory = false
                 },
+                onRename = { id, t -> historyViewModel.rename(id, t) },
                 onDelete = { id ->
                     historyViewModel.delete(id)
                     assistantViewModel.onConversationDeleted(id)

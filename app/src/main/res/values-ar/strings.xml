@@ -120,7 +120,7 @@
     <string name="gradcam_subtitle">يوضح المناطق التي ركز عليها الذكاء الاصطناعي — ليس تشخيصاً</string>
     <string name="segmentation_title">تقسيم الرئتين</string>
     <string name="segmentation_subtitle">حدود الرئة المكتشفة بالذكاء الاصطناعي — للمراجعة التعليمية فقط</string>
-    <string name="ai_not_diagnosis">⚠️ مخرجات تعليمية مولّدة بالذكاء الاصطناعي — ليست تشخيصاً طبياً. شارك هذه الصور مع طبيبك للتفسير المهني.</string>
+    <string name="ai_not_diagnosis">مخرجات تعليمية مولّدة بالذكاء الاصطناعي — ليست تشخيصاً طبياً. شارك هذه الصور مع طبيبك للتفسير المهني.</string>
     <string name="image_decode_error">تعذر عرض الصورة</string>
     <string name="try_again">إعادة المحاولة</string>
     <string name="back">رجوع</string>
@@ -150,7 +150,7 @@
     <string name="ask_placeholder">اكتب سؤالك هنا…</string>
     <string name="assistant_status_online">متصل · مساعد تعليمي</string>
     <string name="assistant_status_typing">يكتب الآن…</string>
-    <string name="assistant_welcome_title">أهلاً %1$s 👋</string>
+    <string name="assistant_welcome_title">أهلاً %1$s</string>
     <string name="assistant_welcome_body">اسألني عن صحة الرئة، الفحص المبكر، أو التحضير لزيارة الطبيب.</string>
     <string name="assistant_prompt_eligibility">من المؤهَّل لفحص LDCT (الأشعة المقطعية منخفضة الجرعة)؟</string>
     <string name="assistant_prompt_symptoms">ما الأعراض المبكرة التي يجب الانتباه لها؟</string>
@@ -171,7 +171,7 @@
     <string name="chat_new_chat">محادثة جديدة</string>
     <string name="chat_default_user_name">يا صديقي</string>
     <string name="chat_loading_conversation">جاري تحميل المحادثة</string>
-    <string name="chat_emergency_message">⚠️ تنبيه طبي عاجل: الأعراض التي ذكرتها (مثل خروج دم أو صعوبة تنفس حادة) تتطلب تقييماً طبياً فورياً أو التوجه لأقرب طوارئ، ولا يجب الاعتماد على المساعد الذكي.</string>
+    <string name="chat_emergency_message">تنبيه طبي عاجل: الأعراض التي ذكرتها (مثل خروج دم أو صعوبة تنفس حادة) تتطلب تقييماً طبياً فورياً أو التوجه لأقرب طوارئ، ولا يجب الاعتماد على المساعد الذكي.</string>
     <string name="chat_error_server">خطأ (%1$s): %2$s</string>
     <string name="chat_error_interrupted">لم يصل رد على هذه الرسالة.</string>
 
@@ -334,7 +334,7 @@
     <string name="symptom_tracker_log_symptom">تسجيل عرض</string>
     <string name="symptom_tracker_filter_all">جميع السجلات</string>
     <string name="symptom_tracker_filter_active">النشطة</string>
-    <string name="symptom_tracker_filter_urgent">حالات حادة / طوارئ 🚨</string>
+    <string name="symptom_tracker_filter_urgent">حالات حادة / طوارئ</string>
     <string name="symptom_tracker_filter_resolved">تم التعافي</string>
     <string name="symptom_tracker_stats_active">نشط</string>
     <string name="symptom_tracker_stats_urgent">حرج</string>

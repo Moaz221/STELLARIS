@@ -34,6 +34,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import com.example.myapplication.core.ui.loc
 import com.example.myapplication.R
 import com.example.myapplication.core.design.LungCarePalette
 import com.example.myapplication.core.design.lungCarePalette
@@ -54,6 +66,27 @@ fun VisionLabScreen(
     }
 
     val ctx = androidx.compose.ui.platform.LocalContext.current
+    val sp = remember { ctx.getSharedPreferences("stellaris_prefs", android.content.Context.MODE_PRIVATE) }
+    var consented by remember { mutableStateOf(sp.getBoolean("vision_consent", false)) }
+    var showConsent by remember { mutableStateOf(false) }
+    if (showConsent) {
+        AlertDialog(
+            onDismissRequest = { showConsent = false },
+            title = { Text(loc("Send this image for analysis?", "إرسال الصورة للتحليل؟")) },
+            text = {
+                Text(loc(
+                    "When you press Analyze, the image you chose is sent over the internet to the image-analysis server used by this app, to produce the result. Only the image is sent, not your name or account. Do not use images that show your name or ID. We cannot describe how the server handles images, so send only what you are comfortable sharing. The result is a visual aid, not a medical diagnosis. You will be asked this only once.",
+                    "لما تضغط تحليل، الصورة اللي اخترتها بتتبعت عبر الإنترنت لسيرفر تحليل الصور اللي التطبيق بيستخدمه عشان تطلع النتيجة. بتتبعت الصورة بس، من غير اسمك أو حسابك. متستخدمش صور ظاهر فيها اسمك أو رقم بطاقتك. مش قادرين نوضح بيتعامل مع الصور إزاي على السيرفر، فابعت بس اللي مرتاح إنك تشاركه. النتيجة مساعدة بصرية مش تشخيص طبي. هنسألك السؤال ده مرة واحدة بس."
+                ), fontSize = 13.sp)
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    sp.edit().putBoolean("vision_consent", true).apply(); consented = true; showConsent = false; viewModel.analyze()
+                }) { Text(loc("I agree, analyze", "أوافق، حلّل")) }
+            },
+            dismissButton = { TextButton(onClick = { showConsent = false }) { Text(loc("Cancel", "إلغاء")) } }
+        )
+    }
     var cameraUri by remember { androidx.compose.runtime.mutableStateOf<android.net.Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         if (ok) cameraUri?.let { viewModel.onImageSelected(it) }
@@ -174,21 +207,7 @@ fun VisionLabScreen(
                     }
 
                     VisionUiState.ANALYZING -> {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = p.primary, modifier = Modifier.size(48.dp))
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(R.string.analyzing),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = p.textPrimary
-                            )
-                            Text(
-                                text = stringResource(R.string.analyzing_hint),
-                                fontSize = 11.sp,
-                                color = p.textSecondary
-                            )
-                        }
+                        ScanningView(state.selectedImageUri, state.step, p) { viewModel.cancel() }
                     }
 
                     VisionUiState.RESULT -> {
@@ -203,20 +222,22 @@ fun VisionLabScreen(
                     VisionUiState.ERROR -> {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.padding(16.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ErrorOutline,
-                                contentDescription = null,
-                                tint = p.urgent,
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(Modifier.height(8.dp))
+                            Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = p.urgent, modifier = Modifier.size(48.dp))
+                            Text(loc("Could not analyze the image", "تعذر تحليل الصورة"), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = p.textPrimary)
                             Text(
-                                text = state.errorRes?.let { stringResource(it) } ?: stringResource(R.string.error_generic),
-                                fontSize = 13.sp,
-                                color = p.urgent
+                                text = when (state.errorKind) {
+                                    "TIMEOUT" -> loc("The server took too long to answer. It may be starting up. Try again in a minute.", "السيرفر اتأخر في الرد. ممكن يكون بيشتغل دلوقتي. جرّب تاني بعد دقيقة.")
+                                    "NETWORK" -> loc("No connection to the server. Check your internet and try again.", "مفيش اتصال بالسيرفر. اتأكد من الإنترنت وجرّب تاني.")
+                                    "BAD_IMAGE" -> loc("The server could not read this image. Choose a clear X-ray image (JPG or PNG).", "السيرفر مقدرش يقرا الصورة دي. اختار صورة أشعة واضحة (JPG أو PNG).")
+                                    "SERVER" -> loc("The server had a problem. Please try again later.", "السيرفر فيه مشكلة. جرّب تاني بعد شوية.")
+                                    else -> stringResource(R.string.error_generic)
+                                },
+                                fontSize = 13.sp, color = p.urgent, textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
+                            Text(loc("Your image is still selected.", "صورتك لسه مختارة."), fontSize = 12.sp, color = p.textSecondary)
                         }
                     }
                 }
@@ -260,7 +281,7 @@ fun VisionLabScreen(
                 }
 
                 Button(
-                    onClick = { viewModel.analyze() },
+                    onClick = { if (consented) viewModel.analyze() else showConsent = true },
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
@@ -280,12 +301,18 @@ fun VisionLabScreen(
                 enter = fadeIn() + slideInVertically { it / 3 }
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = stringResource(R.string.analysis_results),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = p.textPrimary
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(16.dp), color = p.primary.copy(alpha = 0.10f),
+                        border = BorderStroke(1.5.dp, p.primary.copy(alpha = 0.7f))
+                    ) {
+                        Row(Modifier.padding(14.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = p.primary, modifier = Modifier.size(28.dp))
+                            Column {
+                                Text(stringResource(R.string.analysis_results), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = p.textPrimary)
+                                Text(loc("Analysis complete. Review the highlighted areas with your doctor.", "اكتمل التحليل. راجع المناطق المميزة مع دكتورك."), fontSize = 12.sp, color = p.textSecondary)
+                            }
+                        }
+                    }
 
                     // Grad-CAM overlay
                     state.gradcamBase64?.let { b64 ->
@@ -294,6 +321,14 @@ fun VisionLabScreen(
                             subtitle = stringResource(R.string.gradcam_subtitle),
                             base64 = b64,
                             p = p
+                        )
+                    }
+
+                    state.overlayBase64?.let { b64 ->
+                        ResultImageCard(
+                            title = loc("Overlay", "الصورة مع التظليل"),
+                            subtitle = loc("The X-ray with the model's highlighted area", "الأشعة مع المنطقة اللي ركّز عليها النموذج"),
+                            base64 = b64, p = p
                         )
                     }
 
@@ -307,19 +342,20 @@ fun VisionLabScreen(
                         )
                     }
 
-                    // Educational note
-                    state.educationalNote?.let { note ->
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = p.softMint,
-                            border = BorderStroke(1.dp, p.primary.copy(alpha = 0.2f))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Default.Info, contentDescription = null, tint = p.primary, modifier = Modifier.size(18.dp))
-                                Text(note, fontSize = 11.sp, color = p.textPrimary, lineHeight = 15.sp)
+                    // Finding + confidence
+                    state.confidence?.let { conf ->
+                        val pct = (conf * 100).toInt().coerceIn(0, 100)
+                        val abnormal = (state.prediction ?: "").uppercase().contains("ABNORMAL")
+                        val tint = if (abnormal) p.warning else p.primary
+                        Surface(shape = RoundedCornerShape(16.dp), color = p.surface, border = BorderStroke(1.5.dp, tint.copy(alpha = 0.7f))) {
+                            Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    if (abnormal) loc("Possible finding detected", "تم رصد نتيجة محتملة") else loc("No clear finding detected", "لم يتم رصد نتيجة واضحة"),
+                                    fontSize = 17.sp, fontWeight = FontWeight.Bold, color = tint
+                                )
+                                Text(loc("Model confidence", "درجة ثقة النموذج") + ": $pct%", fontSize = 13.sp, color = p.textPrimary)
+                                LinearProgressIndicator(progress = { conf.toFloat().coerceIn(0f, 1f) }, color = tint, trackColor = p.border, modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)))
+                                Text(loc("This is an automated visual aid. Only a doctor can interpret an X-ray.", "ده مساعد بصري آلي. بس الدكتور هو اللي يقدر يفسر الأشعة."), fontSize = 11.sp, color = p.textSecondary)
                             }
                         }
                     }
@@ -349,7 +385,7 @@ fun VisionLabScreen(
             // Error state action
             if (state.state == VisionUiState.ERROR) {
                 Button(
-                    onClick = { viewModel.reset() },
+                    onClick = { viewModel.analyze() },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = p.urgent)
                 ) {
@@ -396,6 +432,56 @@ private fun ResultImageCard(
                     contentScale = ContentScale.Fit
                 )
             } ?: Text(stringResource(R.string.image_decode_error), color = p.urgent, fontSize = 12.sp)
+        }
+    }
+}
+
+
+@Composable
+private fun ScanningView(uri: android.net.Uri?, step: Int, p: LungCarePalette, onCancel: () -> Unit) {
+    val t = rememberInfiniteTransition(label = "scan")
+    val y by t.animateFloat(0f, 1f, infiniteRepeatable(tween(1800, easing = LinearEasing), RepeatMode.Reverse), label = "y")
+    val pulse by t.animateFloat(0.3f, 1f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "pulse")
+    val neon = p.primary
+    val steps = listOf(
+        loc("Uploading the image...", "جاري رفع الصورة..."),
+        loc("Analyzing...", "جاري التحليل..."),
+        loc("Preparing the result...", "جاري تجهيز النتيجة..."),
+        loc("Still working. The server may be starting up, please wait...", "لسه شغالين. ممكن السيرفر بيشتغل دلوقتي، استنى شوية...")
+    )
+    Box(Modifier.fillMaxSize()) {
+        AsyncImage(model = uri, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        Box(Modifier.fillMaxSize().background(Color(0xB0030A12)))
+        Canvas(Modifier.fillMaxSize()) {
+            val ly = size.height * y
+            val band = 90.dp.toPx()
+            drawRect(
+                brush = Brush.verticalGradient(listOf(Color.Transparent, neon.copy(alpha = 0.35f)), startY = ly - band, endY = ly),
+                topLeft = Offset(0f, ly - band), size = Size(size.width, band)
+            )
+            drawLine(neon, Offset(0f, ly), Offset(size.width, ly), strokeWidth = 3.dp.toPx())
+            val m = 6.dp.toPx()
+            drawRoundRect(
+                color = neon.copy(alpha = pulse), topLeft = Offset(m, m),
+                size = Size(size.width - 2 * m, size.height - 2 * m),
+                cornerRadius = CornerRadius(20.dp.toPx()), style = Stroke(2.dp.toPx())
+            )
+        }
+        Column(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(steps[step.coerceIn(0, 3)], fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(vertical = 6.dp)) {
+                (0..3).forEach { i ->
+                    Box(Modifier.size(if (i == step) 10.dp else 7.dp).clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(if (i <= step) neon else Color.White.copy(alpha = 0.3f)))
+                }
+            }
+            OutlinedButton(onClick = onCancel, shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, neon),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 2.dp)) {
+                Text(loc("Cancel", "إلغاء"), color = neon, fontSize = 13.sp)
+            }
         }
     }
 }

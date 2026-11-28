@@ -569,7 +569,7 @@ private fun HeroOrb(size: Dp) {
     val primary = colors.primary
     val secondary = colors.secondary
 
-    Box(modifier = Modifier.size(size * 2f), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.size(size * 1.8f), contentAlignment = Alignment.Center) {
         Canvas(Modifier.matchParentSize()) {
             val maxR = this.size.minDimension / 2f
             // هالة ناعمة ثابتة
@@ -600,6 +600,16 @@ private fun HeroOrb(size: Dp) {
     }
 }
 
+/** Small code-drawn robot that tilts side to side, like a wave. Replaces the hand emoji. */
+@Composable
+private fun WavingRobot() {
+    val t = rememberInfiniteTransition(label = "wave")
+    val angle by t.animateFloat(-14f, 14f, infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "angle")
+    com.example.myapplication.core.ui.RobotFace(
+        modifier = Modifier.size(34.dp).graphicsLayer { rotationZ = angle; transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1f) }
+    )
+}
+
 @Composable
 private fun WelcomeHero(userName: String, onPromptClick: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
@@ -617,16 +627,21 @@ private fun WelcomeHero(userName: String, onPromptClick: (String) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        HeroOrb(size = 104.dp)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.assistant_welcome_title, userName),
-            fontSize = 24.sp,
-            lineHeight = 32.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = colors.onBackground,
-            textAlign = TextAlign.Center
-        )
+        HeroOrb(size = 96.dp)
+        Spacer(Modifier.height(12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            Text(
+                text = stringResource(R.string.assistant_welcome_title, "\u2068" + userName + "\u2069"),
+                fontSize = 24.sp,
+                lineHeight = 32.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = colors.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+            Spacer(Modifier.width(10.dp))
+            WavingRobot()
+        }
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.assistant_welcome_body),
@@ -1147,7 +1162,7 @@ private fun ChatInputBar(
         ) {
             Row(
                 modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
-                verticalAlignment = Alignment.Bottom
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 TextField(
                     value = value,
@@ -1225,7 +1240,6 @@ private fun SendButton(enabled: Boolean, isBusy: Boolean, onClick: () -> Unit) {
 
     Box(
         modifier = Modifier
-            .padding(bottom = 2.dp)
             .size(46.dp)
             .graphicsLayer {
                 scaleX = scale

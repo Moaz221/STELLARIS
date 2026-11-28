@@ -195,12 +195,12 @@ class SymptomTrackerViewModel : ViewModel() {
         val urgentSymptoms = activeSymptoms.filter { it.isUrgent || it.severity >= 4 }
 
         val sb = StringBuilder()
-        sb.append("📋 LUNG CARE PATIENT SYMPTOM SUMMARY\n")
+        sb.append("LUNG CARE PATIENT SYMPTOM SUMMARY\n")
         sb.append("Generated on: ").append(SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())).append("\n")
         sb.append("Journey Stage: ").append(_uiState.value.journeyType.name).append("\n\n")
 
         if (urgentSymptoms.isNotEmpty()) {
-            sb.append("🚨 URGENT / HIGH SEVERITY SYMPTOMS:\n")
+            sb.append("URGENT / HIGH SEVERITY SYMPTOMS:\n")
             urgentSymptoms.forEach { s ->
                 sb.append("• ").append(s.name)
                     .append(" (Severity: ").append(s.severity).append("/5)")
@@ -210,7 +210,7 @@ class SymptomTrackerViewModel : ViewModel() {
             sb.append("\n")
         }
 
-        sb.append("🩺 ALL ACTIVE SYMPTOMS (Total: ").append(activeSymptoms.size).append("):\n")
+        sb.append("ALL ACTIVE SYMPTOMS (Total: ").append(activeSymptoms.size).append("):\n")
         activeSymptoms.forEach { s ->
             sb.append("• ").append(s.name)
                 .append(" [").append(s.frequency).append("]")
@@ -239,9 +239,9 @@ class SymptomTrackerViewModel : ViewModel() {
 
         if (critical != null) {
             val msg = if (critical.category == SymptomCategory.CRITICAL_EMERGENCY || critical.severity == 5) {
-                com.example.myapplication.core.ui.locNow("🚨 CRITICAL RED FLAG: \"${critical.name}\" requires immediate emergency medical evaluation. Please contact your doctor or local emergency line immediately.", "🚨 علامة خطر شديدة: \"${critical.name}\" محتاجة تقييم طبي طارئ فورًا. اتصل بدكتورك أو بخط الطوارئ حالًا.")
+                com.example.myapplication.core.ui.locNow("CRITICAL RED FLAG: \"${critical.name}\" requires immediate emergency medical evaluation. Please contact your doctor or local emergency line immediately.", "علامة خطر شديدة: \"${critical.name}\" محتاجة تقييم طبي طارئ فورًا. اتصل بدكتورك أو بخط الطوارئ حالًا.")
             } else {
-                com.example.myapplication.core.ui.locNow("⚠️ HIGH SEVERITY ALERT: You logged \"${critical.name}\" with severe intensity. Please inform your healthcare provider.", "⚠️ تنبيه شدة عالية: سجّلت \"${critical.name}\" بشدة عالية. بلّغ مقدم الرعاية الصحية بتاعك.")
+                com.example.myapplication.core.ui.locNow("HIGH SEVERITY ALERT: You logged \"${critical.name}\" with severe intensity. Please inform your healthcare provider.", "تنبيه شدة عالية: سجّلت \"${critical.name}\" بشدة عالية. بلّغ مقدم الرعاية الصحية بتاعك.")
             }
             _uiState.value = _uiState.value.copy(
                 hasUrgentAlert = true,

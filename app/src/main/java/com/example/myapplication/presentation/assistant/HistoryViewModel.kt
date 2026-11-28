@@ -37,6 +37,12 @@ class HistoryViewModel(
         }
     }
 
+    fun rename(id: String, title: String) {
+        viewModelScope.launch {
+            try { history.rename(id, title) } catch (e: CancellationException) { throw e } catch (e: Exception) { Log.e(TAG, "rename failed", e) }
+        }
+    }
+
     fun deleteAll() {
         viewModelScope.launch {
             try {

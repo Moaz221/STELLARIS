@@ -161,7 +161,7 @@ private fun CinematicPage(
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(DeepSpace, Navy))))
         StarfieldBackground(starCount = 36, scan = false)
 
-        // 🎬 الأنيميشن: كبير ومتوسّط في النص العلوي
+        // الأنيميشن: كبير ومتوسّط في النص العلوي
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(if (page.lottieRes > 0) page.lottieRes else com.example.myapplication.R.raw.ai_scan))
         val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
 
@@ -208,7 +208,7 @@ private fun CinematicPage(
             )
         }
 
-        // 🌑 Gradient Overlay تحت عشان الكلام يبان
+        // Gradient Overlay تحت عشان الكلام يبان
         Box(
             Modifier.fillMaxSize().background(
                 Brush.verticalGradient(
