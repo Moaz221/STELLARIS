@@ -175,41 +175,33 @@ fun DoctorQuestionsScreen(
     }
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(stringResource(R.string.add_question), fontWeight = FontWeight.Bold) },
-            text = {
-                OutlinedTextField(
-                    value = newQuestionText,
-                    onValueChange = { newQuestionText = it },
-                    label = { Text(com.example.myapplication.core.ui.loc("Question text", "نص السؤال")) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newQuestionText.isNotBlank()) {
-                            questionsList = questionsList + QuestionItem(
-                                id = System.currentTimeMillis().toString(),
-                                text = newQuestionText,
-                                category = "General",
-                                isAnswered = false
-                            )
-                            newQuestionText = ""
-                            showDialog = false
-                        }
-                    }
-                ) {
-                    Text(com.example.myapplication.core.ui.loc("Save", "حفظ"), fontWeight = FontWeight.Bold)
+        com.example.myapplication.core.ui.FullScreenForm(
+            title = stringResource(R.string.add_question),
+            onClose = { showDialog = false }
+        ) {
+            com.example.myapplication.core.ui.AppField(
+                value = newQuestionText,
+                onValueChange = { newQuestionText = it },
+                label = com.example.myapplication.core.ui.loc("Question text", "نص السؤال"),
+                minLines = 3
+            )
+            com.example.myapplication.core.ui.AppPrimaryButton(
+                text = com.example.myapplication.core.ui.loc("Save", "حفظ"),
+                enabled = newQuestionText.isNotBlank(),
+                onClick = {
+                    questionsList = questionsList + QuestionItem(
+                        id = System.currentTimeMillis().toString(),
+                        text = newQuestionText.trim(),
+                        category = "General",
+                        isAnswered = false
+                    )
+                    newQuestionText = ""
+                    showDialog = false
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(com.example.myapplication.core.ui.loc("Cancel", "إلغاء"))
-                }
-            }
-        )
+            )
+            com.example.myapplication.core.ui.AppSecondaryButton(
+                com.example.myapplication.core.ui.loc("Cancel", "إلغاء"), { showDialog = false })
+        }
     }
 }
 }

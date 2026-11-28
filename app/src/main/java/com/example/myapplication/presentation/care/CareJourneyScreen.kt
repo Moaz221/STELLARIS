@@ -76,7 +76,7 @@ fun CareJourneyScreen(
                 p = p,
                 data = s.data,
                 journey = viewModel.journey,
-                onOpenDiagnosis = onOpenDiagnosis,
+                onOpenDiagnosis = { manage = "diagnosis" },
                 onOpenAppointment = { manage = "appointment" },
                 onOpenMedications = { manage = "medication" },
                 onOpenSideEffects = { manage = "side_effect" },

@@ -187,7 +187,7 @@ fun RiskAssessmentScreen(onBack: () -> Unit = {}) {
                     Text(tr("Start over", "ابدأ من الأول"))
                 }
             } else {
-                LinearProgressIndicator(progress = { (step + 1) / 4f }, modifier = Modifier.fillMaxWidth())
+                LinearProgressIndicator(progress = { (step + 1) / 4f }, modifier = Modifier.fillMaxWidth().height(6.dp), color = com.example.myapplication.core.design.lungCarePalette().primary, trackColor = com.example.myapplication.core.design.lungCarePalette().border)
                 Text(tr("Step ${step + 1} of 4", "خطوة ${step + 1} من 4"), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 previous?.let {
                     Text(tr("Last saved result: ${it.date}", "آخر نتيجة محفوظة: ${it.date}"), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -198,7 +198,7 @@ fun RiskAssessmentScreen(onBack: () -> Unit = {}) {
                             0 -> {
                                 Text(tr("About you", "عنك"), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                 OutlinedTextField(age, { age = it.filter(Char::isDigit).take(3) }, label = { Text(tr("Age", "السن")) },
-                                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth())
+                                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth(), colors = com.example.myapplication.core.ui.appFieldColors(), shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
                             }
                             1 -> {
                                 Text(tr("Smoking", "التدخين"), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
@@ -210,13 +210,13 @@ fun RiskAssessmentScreen(onBack: () -> Unit = {}) {
                                 }
                                 if (smoking != null && smoking != Smoking.NEVER) {
                                     OutlinedTextField(packsPerDay, { packsPerDay = it.filter { c -> c.isDigit() || c == '.' }.take(4) }, label = { Text(tr("Packs per day (20 cigarettes = 1)", "علب في اليوم (20 سيجارة = علبة)")) },
-                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.fillMaxWidth())
+                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.fillMaxWidth(), colors = com.example.myapplication.core.ui.appFieldColors(), shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
                                     OutlinedTextField(years, { years = it.filter { c -> c.isDigit() || c == '.' }.take(4) }, label = { Text(tr("Years smoked", "عدد سنين التدخين")) },
-                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.fillMaxWidth())
+                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.fillMaxWidth(), colors = com.example.myapplication.core.ui.appFieldColors(), shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
                                 }
                                 if (smoking == Smoking.FORMER) {
                                     OutlinedTextField(quitYearsAgo, { quitYearsAgo = it.filter(Char::isDigit).take(2) }, label = { Text(tr("Years since you quit", "بقالك كام سنة بطّلت")) },
-                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth())
+                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth(), colors = com.example.myapplication.core.ui.appFieldColors(), shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
                                 }
                             }
                             2 -> {

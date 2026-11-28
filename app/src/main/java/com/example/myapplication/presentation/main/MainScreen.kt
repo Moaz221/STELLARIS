@@ -222,7 +222,7 @@ fun MainScreen(
                     if (kind == OverlayScreen.SYMPTOMS_TRACKER || kind == OverlayScreen.RISK_ASSESSMENT ||
                         kind == OverlayScreen.DOCTOR_QUESTIONS || kind == OverlayScreen.RECORDS
                     ) {
-                        androidx.compose.material3.ExtendedFloatingActionButton(
+                        com.example.myapplication.core.ui.ShareWithAssistantButton(
                             onClick = {
                                 shareScope.launch {
                                     val text = when (kind) {
@@ -247,9 +247,7 @@ fun MainScreen(
                                 .align(androidx.compose.ui.Alignment.BottomEnd)
                                 .navigationBarsPadding()
                                 .padding(16.dp)
-                        ) {
-                            Text(stringResource(R.string.share_ai_button))
-                        }
+                        )
                     }
                 }
             }
@@ -426,11 +424,25 @@ private fun MainTabContent(
         MainTab.Assistant -> Unit
 
         MainTab.Care -> {
+            val shareScope = androidx.compose.runtime.rememberCoroutineScope()
+            val shareCtx = androidx.compose.ui.platform.LocalContext.current
             CareJourneyScreen(
                 onOpenQuestions = { onOpenOverlay(OverlayScreen.DOCTOR_QUESTIONS) },
                 onOpenRecords = { onOpenOverlay(OverlayScreen.RECORDS) },
                 onOpenEducation = { onOpenOverlay(OverlayScreen.EDUCATION_HUB) },
-                onShareSummary = { onOpenOverlay(OverlayScreen.SYMPTOMS_TRACKER) }
+                onShareSummary = {
+                    shareScope.launch {
+                        val text = ShareWithAi.careSummary()
+                        if (text == null) {
+                            android.widget.Toast.makeText(shareCtx, shareCtx.getString(R.string.share_ai_nothing), android.widget.Toast.LENGTH_LONG).show()
+                        } else {
+                            val i = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"; putExtra(android.content.Intent.EXTRA_TEXT, text)
+                            }
+                            shareCtx.startActivity(android.content.Intent.createChooser(i, null).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                        }
+                    }
+                }
             )
         }
 

@@ -882,24 +882,10 @@ private fun AddEditSymptomDialog(
     var frequency by remember { mutableStateOf(symptomToEdit?.frequency ?: "Occasional") }
     var triggers by remember { mutableStateOf(symptomToEdit?.triggers ?: "") }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(28.dp),
-        containerColor = p.cardBottom,
-        title = {
-            Text(
-                text = if (symptomToEdit == null) stringResource(R.string.symptom_tracker_log_new) else stringResource(R.string.symptom_tracker_edit_entry),
-                fontWeight = FontWeight.Bold,
-                color = p.textPrimary
-            )
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 440.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
+    com.example.myapplication.core.ui.FullScreenForm(
+        title = if (symptomToEdit == null) stringResource(R.string.symptom_tracker_log_new) else stringResource(R.string.symptom_tracker_edit_entry),
+        onClose = onDismiss
+    ) {
                 // Preset Quick Pills
                 if (symptomToEdit == null) {
                     Text(
@@ -937,12 +923,11 @@ private fun AddEditSymptomDialog(
                 }
 
                 // Symptom Name Field
-                OutlinedTextField(
+                com.example.myapplication.core.ui.AppField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.symptom_tracker_name_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    label = stringResource(R.string.symptom_tracker_name_label),
+                    
                 )
 
                 // Severity Slider (1 - 5)
@@ -1016,47 +1001,26 @@ private fun AddEditSymptomDialog(
                 }
 
                 // Triggers Field
-                OutlinedTextField(
+                com.example.myapplication.core.ui.AppField(
                     value = triggers,
                     onValueChange = { triggers = it },
-                    label = { Text(stringResource(R.string.symptom_tracker_triggers_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    label = stringResource(R.string.symptom_tracker_triggers_label),
+                    
                 )
 
                 // Notes Field
-                OutlinedTextField(
+                com.example.myapplication.core.ui.AppField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text(stringResource(R.string.symptom_tracker_notes_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    label = stringResource(R.string.symptom_tracker_notes_label),
                     minLines = 2
                 )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (name.isNotBlank()) {
-                        onSave(name, category, severity, isUrgent, notes, frequency, triggers)
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = p.accent)
-            ) {
-                Text(
-                    text = stringResource(R.string.symptom_tracker_save_entry),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = stringResource(R.string.cancel),
-                    color = p.textSecondary
-                )
-            }
-        }
-    )
+            
+        com.example.myapplication.core.ui.AppPrimaryButton(
+            text = stringResource(R.string.symptom_tracker_save_entry),
+            enabled = name.isNotBlank(),
+            onClick = { onSave(name, category, severity, isUrgent, notes, frequency, triggers) }
+        )
+        com.example.myapplication.core.ui.AppSecondaryButton(stringResource(R.string.cancel), onDismiss)
+    }
 }

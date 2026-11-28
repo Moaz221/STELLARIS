@@ -54,4 +54,22 @@ object ShareWithAi {
         val r = list.firstOrNull() ?: return null
         return HEAD + "My lung screening risk check (" + r.date + "):\n" + r.summary
     }
+
+    /** Plain-text summary for sharing with the user's medical team through the system share sheet. */
+    suspend fun careSummary(): String? {
+        val sb = StringBuilder("My health summary (from my own entries in STELLARIS; not a diagnosis)\n")
+        var any = false
+        AppStore.load("care_diagnosis", com.example.myapplication.core.model.DiagnosisInfo.serializer()).firstOrNull()?.let {
+            sb.append("\nDiagnosis told by my doctor: ${it.title}"); if (it.details.isNotBlank()) sb.append(" - ${it.details}"); sb.append("\n"); any = true
+        }
+        val symptoms = AppStore.load("symptoms", TrackedSymptom.serializer()).filter { !it.isResolved }
+        if (symptoms.isNotEmpty()) { any = true; sb.append("\nSymptoms:\n"); symptoms.forEach { sb.append("- ${it.name}, severity ${it.severity}/5, ${it.frequency}\n") } }
+        val meds = AppStore.load("care_medications", com.example.myapplication.core.model.Medication.serializer())
+        if (meds.isNotEmpty()) { any = true; sb.append("\nMedications:\n"); meds.forEach { sb.append("- ${it.name} ${it.instructions} ${it.reminderTimes.joinToString(", ")}\n") } }
+        val fx = AppStore.load("care_side_effects", com.example.myapplication.core.model.SideEffectEntry.serializer())
+        if (fx.isNotEmpty()) { any = true; sb.append("\nSide effects:\n"); fx.forEach { sb.append("- ${it.name} (${it.severity})\n") } }
+        val appts = AppStore.load("care_appointments", com.example.myapplication.core.model.Appointment.serializer())
+        if (appts.isNotEmpty()) { any = true; sb.append("\nAppointments:\n"); appts.forEach { sb.append("- ${it.title} ${it.dateTime}\n") } }
+        return if (any) sb.toString() else null
+    }
 }

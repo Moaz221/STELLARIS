@@ -69,5 +69,9 @@ class CareJourneyViewModel @JvmOverloads constructor(
         repository.addSideEffect(SideEffectEntry(java.util.UUID.randomUUID().toString(), name, severity, now(), notes.ifBlank { null }, SourceType.PATIENT_ENTERED, VerificationStatus.USER_CONFIRMED, now(), now()))
     }
 
+    fun setDiagnosis(title: String, details: String, specialist: String) = update {
+        repository.setDiagnosis(DiagnosisInfo(java.util.UUID.randomUUID().toString(), title, details, now(), specialist, SourceType.PATIENT_ENTERED, VerificationStatus.USER_CONFIRMED, now(), now()))
+    }
+
     fun delete(kind: String, id: String) = update { repository.delete(kind, id) }
 }

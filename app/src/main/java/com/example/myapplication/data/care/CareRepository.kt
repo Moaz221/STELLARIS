@@ -10,13 +10,14 @@ interface CareRepository {
     suspend fun addMedication(item: Medication): CareJourneyState
     suspend fun addSideEffect(item: SideEffectEntry): CareJourneyState
     suspend fun delete(kind: String, id: String): CareJourneyState
+    suspend fun setDiagnosis(item: DiagnosisInfo): CareJourneyState
 }
 
 /** Stores only what the user entered, on the phone, per signed-in user. No demo data. */
 class LocalCareRepository : CareRepository {
 
     private suspend fun load() = CareJourneyState(
-        diagnosis = null,
+        diagnosis = AppStore.load("care_diagnosis", DiagnosisInfo.serializer()).firstOrNull(),
         appointments = AppStore.load("care_appointments", Appointment.serializer()),
         medications = AppStore.load("care_medications", Medication.serializer()),
         sideEffects = AppStore.load("care_side_effects", SideEffectEntry.serializer()),
@@ -52,6 +53,11 @@ class LocalCareRepository : CareRepository {
             "medication" -> AppStore.save("care_medications", Medication.serializer(), AppStore.load("care_medications", Medication.serializer()).filter { it.id != id })
             "side_effect" -> AppStore.save("care_side_effects", SideEffectEntry.serializer(), AppStore.load("care_side_effects", SideEffectEntry.serializer()).filter { it.id != id })
         }
+        return load()
+    }
+
+    override suspend fun setDiagnosis(item: DiagnosisInfo): CareJourneyState {
+        AppStore.save("care_diagnosis", DiagnosisInfo.serializer(), listOf(item))
         return load()
     }
 }

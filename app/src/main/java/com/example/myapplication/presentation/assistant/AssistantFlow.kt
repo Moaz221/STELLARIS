@@ -37,7 +37,7 @@ fun AssistantFlow(onBack: () -> Unit) {
     var draft by rememberSaveable { mutableStateOf("") }
 
     androidx.compose.runtime.LaunchedEffect(Unit) {
-        ShareWithAi.take()?.let { assistantViewModel.sendMessage(it) }
+        ShareWithAi.take()?.let { draft = it }
     }
 
     BackHandler(enabled = showHistory) { showHistory = false }

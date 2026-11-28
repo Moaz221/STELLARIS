@@ -1211,7 +1211,8 @@ private fun AddRecordSheet(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = p.accent,
                         contentColor = Color.White,
-                        disabledContainerColor = p.accent.copy(alpha = 0.3f)
+                        disabledContainerColor = p.accent.copy(alpha = 0.45f),
+                        disabledContentColor = Color.White.copy(alpha = 0.8f)
                     )
                 ) {
                     Icon(
@@ -1235,9 +1236,13 @@ private fun AddRecordSheet(
 @Composable
 private fun recordTextFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedBorderColor = homePalette().accent,
-    unfocusedBorderColor = homePalette().borderDim,
+    unfocusedBorderColor = homePalette().textSecondary,
     focusedTextColor = homePalette().textPrimary,
     unfocusedTextColor = homePalette().textPrimary,
+    focusedLabelColor = homePalette().accent,
+    unfocusedLabelColor = homePalette().textSecondary,
+    focusedContainerColor = homePalette().cardTop,
+    unfocusedContainerColor = homePalette().cardTop,
     cursorColor = homePalette().accent
 )
 
