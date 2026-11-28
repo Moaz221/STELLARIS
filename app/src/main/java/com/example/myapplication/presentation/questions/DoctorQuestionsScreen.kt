@@ -23,6 +23,7 @@ import com.example.myapplication.presentation.components.LungCareCard
 import com.example.myapplication.presentation.components.LungCareTag
 import com.example.myapplication.presentation.home.homePalette
 
+@kotlinx.serialization.Serializable
 data class QuestionItem(
     val id: String,
     val text: String,
@@ -37,6 +38,15 @@ fun DoctorQuestionsScreen(
     val p = homePalette()
     var questionsList by remember {
         mutableStateOf(emptyList<QuestionItem>())
+    }
+
+    var loaded by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        questionsList = com.example.myapplication.data.local.AppStore.load("questions", QuestionItem.serializer())
+        loaded = true
+    }
+    androidx.compose.runtime.LaunchedEffect(questionsList, loaded) {
+        if (loaded) com.example.myapplication.data.local.AppStore.save("questions", QuestionItem.serializer(), questionsList)
     }
 
     var showDialog by remember { mutableStateOf(false) }

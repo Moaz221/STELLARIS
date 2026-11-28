@@ -1,6 +1,9 @@
 package com.example.myapplication.presentation.records
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.local.AppStore
+import kotlinx.coroutines.launch
 import com.example.myapplication.presentation.home.JourneyType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +13,7 @@ import java.util.UUID
 // ---------------------------------------------------------------------------
 // Data Models
 // ---------------------------------------------------------------------------
+@kotlinx.serialization.Serializable
 enum class RecordType(val label: String, val labelAr: String) {
     LAB("Lab Results", "تحاليل"),
     IMAGING("Imaging", "أشعة"),
@@ -19,14 +23,17 @@ enum class RecordType(val label: String, val labelAr: String) {
     PRESCRIPTION("Prescription", "روشتة")
 }
 
+@kotlinx.serialization.Serializable
 enum class RecordStatus {
     NORMAL, ABNORMAL, PENDING, UNKNOWN
 }
 
+@kotlinx.serialization.Serializable
 enum class RecordSource {
     PATIENT_ENTERED, CLINICIAN_PROVIDED, IMPORTED
 }
 
+@kotlinx.serialization.Serializable
 data class MedicalRecord(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
@@ -43,6 +50,7 @@ data class MedicalRecord(
     val verificationStatus: String = "UNVERIFIED"
 )
 
+@kotlinx.serialization.Serializable
 data class LabValue(
     val name: String,
     val result: String,
@@ -159,106 +167,22 @@ class MedicalRecordsViewModel : ViewModel() {
         else _uiState.value.records.filter { it.type == filter }
     }
 
-    private fun updateRecordsList(records: List<MedicalRecord>) {
+    private fun updateRecordsList(records: List<MedicalRecord>, persist: Boolean = true) {
         _uiState.value = _uiState.value.copy(
             records = records,
             totalCount = records.size,
             pendingCount = records.count { it.status == RecordStatus.PENDING },
             abnormalCount = records.count { it.status == RecordStatus.ABNORMAL }
         )
+        if (persist) {
+            viewModelScope.launch { AppStore.save("records", MedicalRecord.serializer(), records) }
+        }
     }
 
     private fun loadPrototypeData() {
-        val records = listOf(
-            MedicalRecord(
-                title = "Complete Blood Count (CBC)",
-                type = RecordType.LAB,
-                status = RecordStatus.NORMAL,
-                date = "Dec 5, 2024",
-                doctor = "Dr. Sarah Ahmed",
-                facility = "Cairo Medical Lab",
-                summary = "All values within normal range",
-                notes = "Fasting blood sample",
-                values = listOf(
-                    LabValue("WBC", "7.2 K/uL", "4.5–11.0", false),
-                    LabValue("RBC", "4.8 M/uL", "4.5–5.5", false),
-                    LabValue("Hemoglobin", "14.2 g/dL", "13.5–17.5", false),
-                    LabValue("Platelets", "245 K/uL", "150–400", false)
-                ),
-                isVerified = true,
-                verificationStatus = "CLINICIAN_CONFIRMED"
-            ),
-            MedicalRecord(
-                title = "Chest X-Ray (PA & Lateral)",
-                type = RecordType.IMAGING,
-                status = RecordStatus.PENDING,
-                date = "Dec 3, 2024",
-                doctor = "Dr. Mohamed Ali",
-                facility = "Dar Al Fouad Hospital",
-                summary = "Awaiting radiologist report",
-                notes = "Routine screening X-ray",
-                isVerified = false,
-                verificationStatus = "UNVERIFIED"
-            ),
-            MedicalRecord(
-                title = "Pulmonary Function Test (PFT)",
-                type = RecordType.LAB,
-                status = RecordStatus.ABNORMAL,
-                date = "Nov 28, 2024",
-                doctor = "Dr. Sarah Ahmed",
-                facility = "Cairo Pulmonology Center",
-                summary = "Mild obstructive pattern detected",
-                notes = "FEV1/FVC ratio slightly below normal",
-                values = listOf(
-                    LabValue("FEV1", "2.1 L", "2.8–3.5", true),
-                    LabValue("FVC", "3.4 L", "3.5–4.8", true),
-                    LabValue("FEV1/FVC", "62%", ">70%", true),
-                    LabValue("DLCO", "78%", ">75%", false)
-                ),
-                isVerified = true,
-                verificationStatus = "CLINICIAN_CONFIRMED"
-            ),
-            MedicalRecord(
-                title = "Oncology Consultation",
-                type = RecordType.VISIT,
-                status = RecordStatus.UNKNOWN,
-                date = "Nov 20, 2024",
-                doctor = "Dr. Ahmed Hassan",
-                facility = "Cairo Oncology Center",
-                summary = "Initial consultation — discussed screening options",
-                notes = "Recommended LDCT screening based on risk factors",
-                isVerified = true,
-                verificationStatus = "CLINICIAN_CONFIRMED"
-            ),
-            MedicalRecord(
-                title = "CT Scan — Chest with Contrast",
-                type = RecordType.IMAGING,
-                status = RecordStatus.ABNORMAL,
-                date = "Nov 15, 2024",
-                doctor = "Dr. Mohamed Ali",
-                facility = "Dar Al Fouad Hospital",
-                summary = "Small nodule detected in right upper lobe (6mm)",
-                notes = "Follow-up CT recommended in 3 months",
-                isVerified = true,
-                verificationStatus = "CLINICIAN_CONFIRMED"
-            ),
-            MedicalRecord(
-                title = "Tumor Markers Panel",
-                type = RecordType.LAB,
-                status = RecordStatus.NORMAL,
-                date = "Nov 10, 2024",
-                doctor = "Dr. Sarah Ahmed",
-                facility = "Cairo Medical Lab",
-                summary = "All tumor markers within normal limits",
-                values = listOf(
-                    LabValue("CEA", "2.1 ng/mL", "<5.0", false),
-                    LabValue("CYFRA 21-1", "1.8 ng/mL", "<3.3", false),
-                    LabValue("NSE", "12.4 ng/mL", "<16.3", false)
-                ),
-                isVerified = true,
-                verificationStatus = "CLINICIAN_CONFIRMED"
-            )
-        )
-        updateRecordsList(records)
+        // No demo data. Load only what the user saved.
+        viewModelScope.launch {
+            updateRecordsList(AppStore.load("records", MedicalRecord.serializer()), persist = false)
+        }
     }
 }

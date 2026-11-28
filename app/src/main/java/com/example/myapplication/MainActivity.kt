@@ -9,6 +9,7 @@ import com.example.myapplication.presentation.navigation.StellarisNavGraph
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.example.myapplication.data.local.AppStore.init(applicationContext)
         enableEdgeToEdge()
         setContent {
             StellarisNavGraph()

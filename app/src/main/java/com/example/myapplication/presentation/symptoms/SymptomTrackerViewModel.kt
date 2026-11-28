@@ -1,6 +1,9 @@
 package com.example.myapplication.presentation.symptoms
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.local.AppStore
+import kotlinx.coroutines.launch
 import com.example.myapplication.presentation.home.JourneyType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +31,7 @@ enum class SymptomFilter {
     RESOLVED
 }
 
+@kotlinx.serialization.Serializable
 data class TrackedSymptom(
     val id: String,
     val name: String,
@@ -67,6 +71,12 @@ data class SymptomTrackerUiState(
 // SymptomTrackerViewModel
 // ---------------------------------------------------------------------------
 class SymptomTrackerViewModel : ViewModel() {
+
+    private fun persist() {
+        val list = _uiState.value.symptoms
+        viewModelScope.launch { AppStore.save("symptoms", TrackedSymptom.serializer(), list) }
+    }
+
 
     private val _uiState = MutableStateFlow(SymptomTrackerUiState())
     val uiState: StateFlow<SymptomTrackerUiState> = _uiState.asStateFlow()
@@ -159,6 +169,7 @@ class SymptomTrackerViewModel : ViewModel() {
         )
 
         reevaluateUrgency()
+        persist()
     }
 
     fun toggleResolved(id: String) {
@@ -168,6 +179,7 @@ class SymptomTrackerViewModel : ViewModel() {
             }
         )
         reevaluateUrgency()
+        persist()
     }
 
     fun deleteSymptom(id: String) {
@@ -175,6 +187,7 @@ class SymptomTrackerViewModel : ViewModel() {
             symptoms = _uiState.value.symptoms.filterNot { it.id == id }
         )
         reevaluateUrgency()
+        persist()
     }
 
     fun generateDoctorSummary() {
@@ -244,6 +257,10 @@ class SymptomTrackerViewModel : ViewModel() {
 
     private fun loadInitialData() {
         _uiState.value = SymptomTrackerUiState(journeyType = JourneyType.EARLY_DETECTION, symptoms = emptyList())
-        reevaluateUrgency()
+        viewModelScope.launch {
+            val saved = AppStore.load("symptoms", TrackedSymptom.serializer())
+            _uiState.value = _uiState.value.copy(symptoms = saved)
+            reevaluateUrgency()
+        }
     }
 }
