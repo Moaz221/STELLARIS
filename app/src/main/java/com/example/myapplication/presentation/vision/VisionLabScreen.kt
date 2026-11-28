@@ -232,6 +232,7 @@ fun VisionLabScreen(
                                     "TIMEOUT" -> loc("The server took too long to answer. It may be starting up. Try again in a minute.", "السيرفر اتأخر في الرد. ممكن يكون بيشتغل دلوقتي. جرّب تاني بعد دقيقة.")
                                     "NETWORK" -> loc("No connection to the server. Check your internet and try again.", "مفيش اتصال بالسيرفر. اتأكد من الإنترنت وجرّب تاني.")
                                     "BAD_IMAGE" -> loc("The server could not read this image. Choose a clear X-ray image (JPG or PNG).", "السيرفر مقدرش يقرا الصورة دي. اختار صورة أشعة واضحة (JPG أو PNG).")
+                                    "OFFLINE" -> loc("The analysis service is offline right now. Please try again later.", "خدمة التحليل مش شغالة دلوقتي. جرّب تاني بعد شوية.")
                                     "SERVER" -> loc("The server had a problem. Please try again later.", "السيرفر فيه مشكلة. جرّب تاني بعد شوية.")
                                     else -> stringResource(R.string.error_generic)
                                 },

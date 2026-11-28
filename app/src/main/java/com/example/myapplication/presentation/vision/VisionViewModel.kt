@@ -98,6 +98,7 @@ class VisionViewModel @JvmOverloads constructor(
                             errorKind = when {
                                 result.code == 400 || result.code == 422 || result.code == 413 -> "BAD_IMAGE"
                                 result.code == null -> "OTHER"
+                                result.code == 404 || result.code == 502 || result.code == 503 || result.code == 504 -> "OFFLINE"
                                 else -> "SERVER"
                             },
                             errorMessage = null,
