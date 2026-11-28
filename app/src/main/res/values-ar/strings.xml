@@ -206,11 +206,11 @@
     <string name="care_subtitle">علاجك ومواعيدك وتذكيراتك في مكان واحد</string>
     <string name="care_disclaimer">LungCare ينظّم معلوماتك — لا يُشخّص ولا يصف الدواء ولا يغني عن فريقك الطبي.</string>
     <string name="demo_data_tag">بيانات تجريبية</string>
-    <string name="patient_entered">أدخلتها أنت</string>
+    <string name="patient_entered">من إدخالك</string>
     <string name="clinician_confirmed">مؤكد من الطبيب</string>
     <string name="ai_generated">مولّد بالذكاء الاصطناعي</string>
     <string name="diagnosis_not_provided">التشخيص — غير متوفر بعد</string>
-    <string name="diagnosis_not_provided_body">تفاصيل التشخيص لا تأتي إلا من تقرير طبيبك. التطبيق لا يخمّن Findings أو يملأ نتائج طبية.</string>
+    <string name="diagnosis_not_provided_body">تفاصيل التشخيص لا تأتي إلا من تقرير طبيبك. التطبيق لا يخمّن النتائج الطبية ولا يملؤها من عنده.</string>
     <string name="add_clinician_info">أضف معلومات من الطبيب ←</string>
     <string name="confirmed_date">تاريخ التأكيد</string>
     <string name="treating_specialist">الطبيب المعالج</string>
@@ -430,7 +430,7 @@
     <string name="profile_theme_to_dark">الوضع الداكن</string>
     <string name="profile_theme_hint">تغيير مظهر التطبيق</string>
     <string name="profile_language_target">English</string>
-    <string name="profile_language_hint">Change app language</string>
+    <string name="profile_language_hint">تغيير لغة التطبيق</string>
     <string name="profile_section_journey">رحلتك</string>
     <string name="profile_journey_early_title">استكشاف الكشف المبكر</string>
     <string name="profile_journey_evaluation_title">تحت التقييم الطبي</string>

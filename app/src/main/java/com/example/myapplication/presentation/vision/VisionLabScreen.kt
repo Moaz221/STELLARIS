@@ -458,7 +458,7 @@ private fun ScanningView(uri: android.net.Uri?, step: Int, p: LungCarePalette, o
         AsyncImage(model = uri, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         Box(Modifier.fillMaxSize().background(Color(0xB0030A12)))
         Canvas(Modifier.fillMaxSize()) {
-            val ly = size.height * y
+            val ly = (size.height - 130.dp.toPx()).coerceAtLeast(1f) * y
             val band = 90.dp.toPx()
             drawRect(
                 brush = Brush.verticalGradient(listOf(Color.Transparent, neon.copy(alpha = 0.35f)), startY = ly - band, endY = ly),
@@ -473,7 +473,7 @@ private fun ScanningView(uri: android.net.Uri?, step: Int, p: LungCarePalette, o
             )
         }
         Column(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(10.dp),
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color(0xE6030A12)).padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(steps[step.coerceIn(0, 3)], fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)

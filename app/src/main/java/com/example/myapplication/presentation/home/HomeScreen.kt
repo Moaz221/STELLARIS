@@ -849,11 +849,17 @@ private fun NextStepCard(
                     text = stringResource(titleRes),
                     fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, color = p.textPrimary
                 )
-                androidx.compose.animation.Crossfade(targetState = messageIndex, label = "heroMsg") { idx ->
-                    Text(
-                        text = stringResource(rotatingMessages[idx % rotatingMessages.size]),
-                        fontSize = 14.sp, lineHeight = 20.sp, color = p.textSecondary
-                    )
+                Box(Modifier.fillMaxWidth().heightIn(min = 60.dp)) {
+                    AnimatedContent(
+                        targetState = messageIndex,
+                        transitionSpec = { fadeIn(androidx.compose.animation.core.tween(300, delayMillis = 250)) togetherWith fadeOut(androidx.compose.animation.core.tween(200)) },
+                        label = "heroMsg"
+                    ) { idx ->
+                        Text(
+                            text = stringResource(rotatingMessages[idx % rotatingMessages.size]),
+                            fontSize = 14.sp, lineHeight = 20.sp, color = p.textSecondary
+                        )
+                    }
                 }
             }
             Canvas(Modifier.size(112.dp)) {

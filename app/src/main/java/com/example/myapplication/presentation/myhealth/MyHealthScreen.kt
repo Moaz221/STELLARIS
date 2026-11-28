@@ -412,13 +412,13 @@ private fun DiagnosedOverviewCard(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = "${state.treatmentDay}",
+                    text = "${state.medications.size}",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = p.success
                 )
                 Text(
-                    text = stringResource(R.string.my_health_treatment_day),
+                    text = com.example.myapplication.core.ui.loc("Active meds", "أدوية نشطة"),
                     fontSize = 11.sp,
                     color = p.textSecondary
                 )
@@ -433,11 +433,6 @@ private fun DiagnosedOverviewCard(
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = p.textPrimary
-                )
-                Text(
-                    text = stringResource(R.string.my_health_meds_count, state.medications.size),
-                    fontSize = 12.sp,
-                    color = p.textSecondary
                 )
                 if (state.appointments.isNotEmpty()) {
                     Text(
@@ -824,8 +819,9 @@ private fun MedicationsPreview(medications: List<Medication>) {
                         fontWeight = FontWeight.Medium,
                         color = p.textPrimary
                     )
-                    Text(
-                        text = "${med.dosage} · ${med.frequency}",
+                    val sub = listOf(med.dosage, med.frequency).filter { it.isNotBlank() }.joinToString(" · ")
+                    if (sub.isNotEmpty()) Text(
+                        text = listOf(med.dosage, med.frequency).filter { it.isNotBlank() }.joinToString(" · "),
                         fontSize = 11.sp,
                         color = p.textSecondary
                     )

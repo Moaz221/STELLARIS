@@ -153,12 +153,9 @@ fun ShareWithAssistantButton(bubble: String, onClick: () -> Unit, modifier: Modi
     var dy by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0f) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         kotlinx.coroutines.delay(1500)
-        while (true) {
-            show = true
-            kotlinx.coroutines.delay(5000)
-            show = false
-            kotlinx.coroutines.delay(20000)
-        }
+        show = true
+        kotlinx.coroutines.delay(4000)
+        show = false
     }
     Column(
         modifier = modifier

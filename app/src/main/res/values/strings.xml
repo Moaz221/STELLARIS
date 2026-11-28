@@ -202,7 +202,7 @@
     <string name="care_subtitle">Treatment, appointments and reminders in one place</string>
     <string name="care_disclaimer">LungCare organizes your information — it does not diagnose, prescribe, or replace your care team.</string>
     <string name="demo_data_tag">Demo data</string>
-    <string name="patient_entered">You entered</string>
+    <string name="patient_entered">Added by you</string>
     <string name="clinician_confirmed">Clinician confirmed</string>
     <string name="ai_generated">AI-generated</string>
     <string name="diagnosis_not_provided">Diagnosis — not provided yet</string>
@@ -426,7 +426,7 @@
     <string name="profile_theme_to_dark">Dark mode</string>
     <string name="profile_theme_hint">Change app appearance</string>
     <string name="profile_language_target">العربية</string>
-    <string name="profile_language_hint">تغيير لغة التطبيق</string>
+    <string name="profile_language_hint">Change app language</string>
     <string name="profile_section_journey">Your journey</string>
     <string name="profile_journey_early_title">Explore Early Detection</string>
     <string name="profile_journey_evaluation_title">Under Medical Evaluation</string>

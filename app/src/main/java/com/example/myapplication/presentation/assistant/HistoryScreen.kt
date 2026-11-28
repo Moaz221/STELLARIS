@@ -228,14 +228,11 @@ private fun HistoryHeader(count: Int, hasItems: Boolean, onBack: () -> Unit, onD
         IconButton(onClick = onBack) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.chat_back), tint = p.textPrimary)
         }
-        Box(Modifier.size(42.dp).clip(CircleShape).background(p.accent.copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
-            Icon(Icons.Outlined.History, null, tint = p.accent)
-        }
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(6.dp))
         Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.chat_history_title), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = p.textPrimary, maxLines = 1)
             Text(
-                stringResource(R.string.chat_history_local_note) + if (hasItems) "  -  $count" else "",
+                stringResource(R.string.chat_history_local_note) + if (hasItems) "  |  " + loc("$count chats", "$count محادثات") else "",
                 fontSize = 12.sp, color = p.textSecondary, maxLines = 1
             )
         }

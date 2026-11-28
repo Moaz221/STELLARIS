@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LightMode
@@ -327,7 +328,7 @@ fun ProfileScreen(
             // 5) الإعدادات
             Entrance(index = 4, animate = animate) {
                 val entries = listOf(
-                    SettingsEntry(Icons.Outlined.Palette, R.string.profile_item_design_title, R.string.profile_item_design_subtitle, onNavigateToDesignPreview),
+                    SettingsEntry(Icons.Outlined.Folder, R.string.profile_item_design_title, R.string.profile_item_design_subtitle, onNavigateToDesignPreview),
                     SettingsEntry(Icons.Outlined.Shield, R.string.profile_item_privpol_title, R.string.profile_item_privpol_subtitle, onPrivacy),
                     SettingsEntry(Icons.Outlined.MedicalServices, R.string.profile_item_howuse_title, R.string.profile_item_howuse_subtitle, onHelp)
                 )
