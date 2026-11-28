@@ -22,11 +22,11 @@
           }
         },
         {
-          "client_id": "711048184229-had8hqvb0ablohjm8mbri0epdv13v70i.apps.googleusercontent.com",
+          "client_id": "711048184229-u8droq3lnggvu73ndrjtfjqtur827sc7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.myapplication",
-            "certificate_hash": "fb6dac78480a72317df729443e4999981a3255bc5c7bf13e6160009ebccbcab8"
+            "certificate_hash": "9e8b81bf40a79d2fadc2e7076fbad44faaea0249"
           }
         },
         {

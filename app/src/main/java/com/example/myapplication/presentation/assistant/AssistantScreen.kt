@@ -542,22 +542,7 @@ private fun AiAvatar(size: Dp, pulsing: Boolean = false, animated: Boolean = tru
                 ),
             contentAlignment = Alignment.Center
         ) {
-            val comp by com.airbnb.lottie.compose.rememberLottieComposition(
-                com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(if (thinking) R.raw.robot_think else R.raw.robot_face)
-            )
-            if (animated) {
-                com.airbnb.lottie.compose.LottieAnimation(
-                    composition = comp,
-                    iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever,
-                    modifier = Modifier.fillMaxSize(0.92f)
-                )
-            } else {
-                com.airbnb.lottie.compose.LottieAnimation(
-                    composition = comp,
-                    progress = { 0.35f },
-                    modifier = Modifier.fillMaxSize(0.92f)
-                )
-            }
+            com.example.myapplication.core.ui.RobotFace(Modifier.fillMaxSize(0.8f), thinking = thinking, animated = animated)
         }
     }
 }

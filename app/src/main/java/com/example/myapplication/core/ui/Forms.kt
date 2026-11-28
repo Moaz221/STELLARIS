@@ -141,7 +141,6 @@ fun appFieldColors(): TextFieldColors {
 @Composable
 fun ShareWithAssistantButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val p = lungCarePalette()
-    val comp by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.robot_face))
     val shape = RoundedCornerShape(30.dp)
     Row(
         modifier = modifier
@@ -152,7 +151,7 @@ fun ShareWithAssistantButton(onClick: () -> Unit, modifier: Modifier = Modifier)
             .padding(start = 6.dp, end = 18.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LottieAnimation(composition = comp, iterations = LottieConstants.IterateForever, modifier = Modifier.size(44.dp))
+        RobotFace(Modifier.size(40.dp))
         Spacer(Modifier.width(4.dp))
         Text(loc("Share with assistant", "شارك مع المساعد"), color = p.onPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
     }
