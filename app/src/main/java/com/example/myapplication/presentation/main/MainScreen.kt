@@ -200,6 +200,9 @@ fun MainScreen(
                             onOpenHealth = {
                                 selectedTabIndex = MainTab.Health.index
                             },
+                            onOpenCare = {
+                                selectedTabIndex = MainTab.Care.index
+                            },
                             onToggleTheme = onToggleTheme,
                             onToggleLanguage = onToggleLanguage,
                             onSignOut = onSignOut
@@ -374,6 +377,7 @@ private fun MainTabContent(
     selectedTab: MainTab,
     onOpenOverlay: (OverlayScreen) -> Unit,
     onOpenHealth: () -> Unit,
+    onOpenCare: () -> Unit,
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
     onSignOut: () -> Unit
@@ -387,7 +391,7 @@ private fun MainTabContent(
                 onNavigateToSymptoms = {
                     onOpenOverlay(OverlayScreen.SYMPTOMS_TRACKER)
                 },
-                onNavigateToRecords = onOpenHealth,
+                onNavigateToRecords = { onOpenOverlay(OverlayScreen.RECORDS) },
                 onNavigateToQuestions = {
                     onOpenOverlay(OverlayScreen.DOCTOR_QUESTIONS)
                 },
@@ -395,7 +399,8 @@ private fun MainTabContent(
                     onOpenOverlay(OverlayScreen.RISK_ASSESSMENT)
                 },
                 onToggleTheme = onToggleTheme,
-                onToggleLanguage = onToggleLanguage
+                onToggleLanguage = onToggleLanguage,
+                onOpenNotifications = onOpenCare
             )
         }
 
@@ -416,7 +421,11 @@ private fun MainTabContent(
                 },
                 onNavigateToEducation = {
                     onOpenOverlay(OverlayScreen.EDUCATION_HUB)
-                }
+                },
+                onNavigateToMedications = onOpenCare,
+                onNavigateToSideEffects = onOpenCare,
+                onNavigateToAppointments = onOpenCare,
+                onNavigateToTimeline = onOpenCare
             )
         }
 
@@ -448,16 +457,50 @@ private fun MainTabContent(
 
         MainTab.Profile -> {
             val profile = remember { com.example.myapplication.data.model.currentUserProfile() }
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            var shownName by remember { mutableStateOf(profile.name) }
+            var editing by remember { mutableStateOf(false) }
+            var draftName by remember { mutableStateOf(profile.name) }
             ProfileScreen(
-                userName = profile.name,
+                userName = shownName,
                 userEmail = profile.email,
                 onSignOut = onSignOut,
                 onToggleTheme = onToggleTheme,
                 onToggleLanguage = onToggleLanguage,
+                onEditProfile = { draftName = shownName; editing = true },
+                onOpenSettings = {
+                    ctx.startActivity(
+                        android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            .setData(android.net.Uri.fromParts("package", ctx.packageName, null))
+                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                },
                 onNavigateToDesignPreview = {
                     onOpenOverlay(OverlayScreen.RECORDS)
                 }
             )
+            if (editing) {
+                com.example.myapplication.core.ui.FullScreenForm(
+                    title = com.example.myapplication.core.ui.loc("Edit profile", "تعديل الحساب"),
+                    onClose = { editing = false }
+                ) {
+                    com.example.myapplication.core.ui.AppField(draftName, { draftName = it }, singleLine = true,
+                        label = com.example.myapplication.core.ui.loc("Display name", "الاسم"))
+                    com.example.myapplication.core.ui.AppPrimaryButton(
+                        text = com.example.myapplication.core.ui.loc("Save", "حفظ"),
+                        enabled = draftName.isNotBlank(),
+                        onClick = {
+                            val n = draftName.trim()
+                            val u = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+                            u?.updateProfile(com.google.firebase.auth.userProfileChangeRequest { displayName = n })
+                            shownName = n
+                            editing = false
+                        }
+                    )
+                    com.example.myapplication.core.ui.AppSecondaryButton(
+                        com.example.myapplication.core.ui.loc("Cancel", "إلغاء"), { editing = false })
+                }
+            }
         }
     }
 }
