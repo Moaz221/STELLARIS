@@ -78,6 +78,7 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Text(com.example.myapplication.BuildConfig.VERSION_NAME, color = TextSecondary, fontSize = 11.sp)
             Spacer(Modifier.height(48.dp))
 
             AuthHeader(

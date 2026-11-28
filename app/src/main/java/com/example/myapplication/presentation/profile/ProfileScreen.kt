@@ -200,6 +200,12 @@ fun ProfileScreen(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+                            Text(
+                                text = com.example.myapplication.BuildConfig.VERSION_NAME,
+                                fontSize = 11.sp,
+                                color = colors.onSurfaceVariant,
+                                maxLines = 1
+                            )
                         }
                         Spacer(Modifier.width(8.dp))
                         SquareIconButton(
