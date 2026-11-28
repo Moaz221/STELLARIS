@@ -332,7 +332,7 @@ private fun StellarisBottomBar(
                             ) {
                                 if (tab == MainTab.Assistant) {
                                     val robot by com.airbnb.lottie.compose.rememberLottieComposition(
-                                        com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(R.raw.robot_wave)
+                                        com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(R.raw.robot_face)
                                     )
                                     com.airbnb.lottie.compose.LottieAnimation(
                                         composition = robot,

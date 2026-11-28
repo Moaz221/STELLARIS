@@ -8,8 +8,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -28,150 +32,167 @@ data class QuestionItem(
     val id: String,
     val text: String,
     val category: String,
-    var isAnswered: Boolean = false
+    var isAnswered: Boolean = false,
+    // Added in build 12. Defaults keep old saved questions loading as active (no data loss).
+    val status: String = "ACTIVE",      // ACTIVE | DONE | DELETED
+    val createdAt: Long = 0L,
+    val completedAt: Long? = null,
+    val deletedAt: Long? = null
 )
+
+private fun fmtDate(ms: Long?): String =
+    if (ms == null || ms <= 0L) "" else java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date(ms))
 
 @Composable
 fun DoctorQuestionsScreen(
     onBack: () -> Unit = {}
 ) {
-    val p = homePalette()
-    var questionsList by remember {
-        mutableStateOf(emptyList<QuestionItem>())
-    }
-
+    val p = com.example.myapplication.core.design.lungCarePalette()
+    var questionsList by remember { mutableStateOf(emptyList<QuestionItem>()) }
     var loaded by remember { mutableStateOf(false) }
-    androidx.compose.runtime.LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
         questionsList = com.example.myapplication.data.local.AppStore.load("questions", QuestionItem.serializer())
+            .map { if (it.isAnswered && it.status == "ACTIVE") it.copy(status = "DONE", completedAt = it.completedAt ?: it.createdAt) else it }
         loaded = true
     }
-    androidx.compose.runtime.LaunchedEffect(questionsList, loaded) {
+    LaunchedEffect(questionsList, loaded) {
         if (loaded) com.example.myapplication.data.local.AppStore.save("questions", QuestionItem.serializer(), questionsList)
     }
 
     var showDialog by remember { mutableStateOf(false) }
     var newQuestionText by remember { mutableStateOf("") }
+    var tab by remember { mutableIntStateOf(0) }
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val msgDone = com.example.myapplication.core.ui.loc("Moved to history as asked", "اتنقل للسجل كـ \"تم السؤال\"")
+    val msgDeleted = com.example.myapplication.core.ui.loc("Question deleted", "اتحذف السؤال")
+    val undo = com.example.myapplication.core.ui.loc("Undo", "تراجع")
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(p.background)
-            .background(
-                Brush.verticalGradient(
-                    0f to p.bgGlow.copy(alpha = 0.45f),
-                    0.35f to p.bgGlowSecondary.copy(alpha = 0.20f),
-                    0.75f to Color.Transparent
-                )
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 20.dp)
-        ) {
-        // Header
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = com.example.myapplication.core.ui.loc("Back", "رجوع"),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.questions_title),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = com.example.myapplication.core.ui.loc("Prepare key topics to discuss during your appointment", "جهّز النقاط المهمة تسأل عنها في الموعد"),
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Button(
-                onClick = { showDialog = true },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = RoundedCornerShape(10.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(com.example.myapplication.core.ui.loc("Add", "إضافة"), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            }
+    fun update(id: String, f: (QuestionItem) -> QuestionItem) {
+        questionsList = questionsList.map { if (it.id == id) f(it) else it }
+    }
+    fun withUndo(id: String, message: String) {
+        scope.launch {
+            val r = snackbar.showSnackbar(message, actionLabel = undo, duration = SnackbarDuration.Short)
+            if (r == SnackbarResult.ActionPerformed) update(id) { it.copy(status = "ACTIVE", isAnswered = false, completedAt = null, deletedAt = null) }
         }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
+    val active = questionsList.filter { it.status == "ACTIVE" }
+    val history = questionsList.filter { it.status != "ACTIVE" }
+        .sortedByDescending { it.deletedAt ?: it.completedAt ?: 0L }
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (questionsList.isEmpty()) {
-                item {
+    Box(Modifier.fillMaxSize().background(p.background)) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = com.example.myapplication.core.ui.loc("Back", "رجوع"), tint = p.textPrimary)
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.questions_title), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = p.textPrimary)
                     Text(
-                        text = com.example.myapplication.core.ui.loc(
-                            "No questions yet. Tap Add to write what you want to ask your doctor.",
-                            "لسه مفيش أسئلة. اضغط إضافة واكتب اللي عايز تسأل عنه الدكتور."
-                        ),
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.fillMaxWidth().padding(24.dp)
+                        com.example.myapplication.core.ui.loc("Prepare key topics to discuss during your appointment", "جهّز النقاط المهمة تسأل عنها في الموعد"),
+                        fontSize = 12.sp, color = p.textSecondary
                     )
                 }
-            }
-            items(questionsList) { item ->
-                LungCareCard(
-                    backgroundColor = MaterialTheme.colorScheme.surface,
-                    cornerRadius = 14.dp
+                Button(
+                    onClick = { showDialog = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = p.primary, contentColor = p.onPrimary),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(com.example.myapplication.core.ui.loc("Add", "إضافة"), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    com.example.myapplication.core.ui.loc("Active (${active.size})", "الحالية (${active.size})"),
+                    com.example.myapplication.core.ui.loc("History (${history.size})", "السجل (${history.size})")
+                ).forEachIndexed { i, label ->
+                    val sel = tab == i
+                    Surface(
+                        onClick = { tab = i }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp),
+                        color = if (sel) p.primary else p.surface,
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, if (sel) p.primary else p.textSecondary)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
+                        Box(Modifier.padding(vertical = 10.dp), contentAlignment = Alignment.Center) {
+                            Text(label, fontWeight = FontWeight.Bold, color = if (sel) p.onPrimary else p.textPrimary)
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
+                if (tab == 0) {
+                    if (active.isEmpty()) item {
+                        Text(
+                            com.example.myapplication.core.ui.loc(
+                                "No questions yet. Tap Add to write what you want to ask your doctor.",
+                                "لسه مفيش أسئلة. اضغط إضافة واكتب اللي عايز تسأل عنه الدكتور."
+                            ), fontSize = 14.sp, color = p.textSecondary, modifier = Modifier.fillMaxWidth().padding(24.dp)
+                        )
+                    }
+                    items(active, key = { it.id }) { item ->
+                        QuestionCard(p) {
                             Checkbox(
-                                checked = item.isAnswered,
-                                onCheckedChange = { checked ->
-                                    questionsList = questionsList.map {
-                                        if (it.id == item.id) it.copy(isAnswered = checked) else it
-                                    }
+                                checked = false,
+                                onCheckedChange = {
+                                    update(item.id) { it.copy(status = "DONE", isAnswered = true, completedAt = System.currentTimeMillis()) }
+                                    withUndo(item.id, msgDone)
                                 },
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = MaterialTheme.colorScheme.primary
-                                )
+                                colors = CheckboxDefaults.colors(checkedColor = p.primary, uncheckedColor = p.textSecondary)
                             )
-                            Column {
+                            Column(Modifier.weight(1f)) {
+                                Text(item.text, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = p.textPrimary, lineHeight = 21.sp)
+                                Spacer(Modifier.height(4.dp))
+                                Text(categoryLabel(item.category) + (fmtDate(item.createdAt).let { if (it.isBlank()) "" else "  •  $it" }), fontSize = 12.sp, color = p.textSecondary)
+                            }
+                            IconButton(onClick = {
+                                update(item.id) { it.copy(status = "DELETED", deletedAt = System.currentTimeMillis()) }
+                                withUndo(item.id, msgDeleted)
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = com.example.myapplication.core.ui.loc("Delete", "حذف"), tint = p.urgent)
+                            }
+                        }
+                    }
+                } else {
+                    if (history.isEmpty()) item {
+                        Text(
+                            com.example.myapplication.core.ui.loc(
+                                "History is empty. Questions you check as asked or delete appear here with their date.",
+                                "السجل فاضي. الأسئلة اللي تعلّم عليها \"تم السؤال\" أو تحذفها هتظهر هنا بتاريخها."
+                            ), fontSize = 14.sp, color = p.textSecondary, modifier = Modifier.fillMaxWidth().padding(24.dp)
+                        )
+                    }
+                    items(history, key = { it.id }) { item ->
+                        val isDeleted = item.status == "DELETED"
+                        QuestionCard(p) {
+                            Column(Modifier.weight(1f).padding(start = 6.dp)) {
+                                Text(item.text, fontSize = 15.sp, color = p.textPrimary, lineHeight = 21.sp)
+                                Spacer(Modifier.height(4.dp))
                                 Text(
-                                    text = item.text,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (item.isAnswered) MaterialTheme.colorScheme.onSurfaceVariant
-                                    else MaterialTheme.colorScheme.onSurface,
-                                    lineHeight = 18.sp
+                                    (if (isDeleted) com.example.myapplication.core.ui.loc("Deleted", "محذوف") else com.example.myapplication.core.ui.loc("Asked", "تم السؤال")) +
+                                        "  •  " + fmtDate(if (isDeleted) item.deletedAt else item.completedAt),
+                                    fontSize = 12.sp, fontWeight = FontWeight.Medium,
+                                    color = if (isDeleted) p.urgent else p.success
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                LungCareTag(
-                                    text = item.category,
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            }
+                            IconButton(onClick = { update(item.id) { it.copy(status = "ACTIVE", isAnswered = false, completedAt = null, deletedAt = null) } }) {
+                                Icon(Icons.Default.Restore, contentDescription = com.example.myapplication.core.ui.loc("Restore", "استعادة"), tint = p.primary)
+                            }
+                            IconButton(onClick = { questionsList = questionsList.filter { it.id != item.id } }) {
+                                Icon(Icons.Default.DeleteForever, contentDescription = com.example.myapplication.core.ui.loc("Delete permanently", "حذف نهائي"), tint = p.urgent)
                             }
                         }
                     }
                 }
             }
         }
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 80.dp))
     }
 
     if (showDialog) {
@@ -189,14 +210,17 @@ fun DoctorQuestionsScreen(
                 text = com.example.myapplication.core.ui.loc("Save", "حفظ"),
                 enabled = newQuestionText.isNotBlank(),
                 onClick = {
-                    questionsList = questionsList + QuestionItem(
-                        id = System.currentTimeMillis().toString(),
-                        text = newQuestionText.trim(),
-                        category = "General",
-                        isAnswered = false
-                    )
+                    questionsList = listOf(
+                        QuestionItem(
+                            id = System.currentTimeMillis().toString(),
+                            text = newQuestionText.trim(),
+                            category = "General",
+                            createdAt = System.currentTimeMillis()
+                        )
+                    ) + questionsList
                     newQuestionText = ""
                     showDialog = false
+                    tab = 0
                 }
             )
             com.example.myapplication.core.ui.AppSecondaryButton(
@@ -204,4 +228,17 @@ fun DoctorQuestionsScreen(
         }
     }
 }
+
+@Composable
+private fun categoryLabel(c: String): String =
+    if (c == "General") com.example.myapplication.core.ui.loc("General", "عام") else c
+
+@Composable
+private fun QuestionCard(p: com.example.myapplication.core.design.LungCarePalette, content: @Composable RowScope.() -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(16.dp), color = p.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, p.border), modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(Modifier.padding(horizontal = 6.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, content = content)
+    }
 }

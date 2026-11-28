@@ -329,7 +329,7 @@ private fun GlowCard(
     val p = homePalette()
 
     var base = modifier
-    if (glow) {
+    if (false && glow) {
         base = base.shadow(
             elevation = (16 * glowIntensity).dp,
             shape = shape,
@@ -451,7 +451,6 @@ private fun UserAvatar(
     Box(
         modifier = Modifier
             .size(44.dp)
-            .shadow(6.dp, CircleShape, ambientColor = p.accent, spotColor = p.accent)
             .clip(CircleShape)
             .background(
                 Brush.linearGradient(
@@ -508,7 +507,6 @@ private fun HeaderCircleButton(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .shadow(2.dp, CircleShape)
                 .clip(CircleShape)
                 .background(
                     Brush.verticalGradient(listOf(p.cardTop, p.cardBottom))
@@ -1357,7 +1355,6 @@ private fun QuickActionCard(
             Box(
                 modifier = Modifier
                     .size(42.dp)
-                    .shadow(4.dp, RoundedCornerShape(13.dp), ambientColor = p.accent)
                     .clip(RoundedCornerShape(13.dp))
                     .background(
                         Brush.linearGradient(
@@ -1421,7 +1418,6 @@ private fun DailyTipCard(onReadMore: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(38.dp)
-                        .shadow(4.dp, CircleShape, ambientColor = p.warning)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
@@ -1524,7 +1520,6 @@ private fun ArticleCard(
             Box(
                 modifier = Modifier
                     .size(58.dp)
-                    .shadow(5.dp, RoundedCornerShape(17.dp), ambientColor = p.accent)
                     .clip(RoundedCornerShape(17.dp))
                     .background(
                         Brush.linearGradient(

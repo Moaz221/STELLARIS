@@ -141,7 +141,7 @@ fun appFieldColors(): TextFieldColors {
 @Composable
 fun ShareWithAssistantButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val p = lungCarePalette()
-    val comp by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.robot_wave))
+    val comp by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.robot_face))
     val shape = RoundedCornerShape(30.dp)
     Row(
         modifier = modifier

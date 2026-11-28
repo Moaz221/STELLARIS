@@ -306,7 +306,6 @@ private fun EarlyDetectionOverviewCard(
                 Box(
                     modifier = Modifier
                         .size(56.dp)
-                        .shadow(8.dp, CircleShape, ambientColor = riskColor)
                         .clip(CircleShape)
                         .background(riskColor.copy(alpha = 0.15f))
                         .border(2.dp, riskColor.copy(alpha = 0.6f), CircleShape),
@@ -461,7 +460,6 @@ private fun OverviewCardBase(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(12.dp, RoundedCornerShape(24.dp), ambientColor = iconColor.copy(alpha = 0.2f))
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.verticalGradient(listOf(p.cardTop, p.cardBottom))
@@ -551,7 +549,6 @@ private fun HealthSectionCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(22.dp), ambientColor = accentColor.copy(alpha = 0.1f))
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom)))
             .border(1.dp, p.borderDim, RoundedCornerShape(22.dp))
@@ -876,7 +873,6 @@ private fun ScreeningReminderCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(8.dp, RoundedCornerShape(22.dp), ambientColor = p.warning.copy(alpha = 0.15f))
             .clip(RoundedCornerShape(22.dp))
             .background(
                 Brush.horizontalGradient(
@@ -1010,7 +1006,6 @@ private fun NextAppointmentCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(22.dp), ambientColor = p.accent.copy(alpha = 0.1f))
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom)))
             .border(

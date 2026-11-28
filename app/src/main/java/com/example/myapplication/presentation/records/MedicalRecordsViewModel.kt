@@ -186,3 +186,6 @@ class MedicalRecordsViewModel : ViewModel() {
         }
     }
 }
+
+@androidx.compose.runtime.Composable
+fun RecordType.display(): String = com.example.myapplication.core.ui.loc(label, labelAr)

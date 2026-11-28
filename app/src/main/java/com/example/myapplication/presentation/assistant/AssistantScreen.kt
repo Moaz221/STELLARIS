@@ -230,6 +230,8 @@ fun AssistantContent(
         messages.mapTo(mutableSetOf()) { it.id }
     }
 
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scrolled by remember { derivedStateOf { listState.firstVisibleItemIndex > 1 } }
     val canSend = !isAiTyping && !isRestoring
     val submit: (String) -> Unit = { text ->
         val clean = text.trim()
@@ -267,6 +269,7 @@ fun AssistantContent(
         FloatingAssistantBar(
             isAiTyping = isAiTyping,
             showRobot = hasConversation,
+            scrolled = scrolled,
             canStartNew = hasConversation,
             onBack = onBack,
             onOpenHistory = onOpenHistory,
@@ -302,6 +305,7 @@ fun AssistantContent(
                         isAiTyping = isAiTyping,
                         errorText = errorText,
                         seenKeys = seenKeys,
+                        listState = listState,
                         onRetry = onRetry
                     )
 
@@ -367,6 +371,7 @@ private fun RoundIconButton(icon: ImageVector, description: String, enabled: Boo
 private fun FloatingAssistantBar(
     isAiTyping: Boolean,
     showRobot: Boolean,
+    scrolled: Boolean,
     canStartNew: Boolean,
     onBack: () -> Unit,
     onOpenHistory: () -> Unit,
@@ -377,8 +382,10 @@ private fun FloatingAssistantBar(
             RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.chat_back), onClick = onBack)
         }
         if (showRobot) {
-            Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
-                AiAvatar(size = 48.dp, pulsing = isAiTyping, thinking = isAiTyping)
+            val robotSize by androidx.compose.animation.core.animateDpAsState(if (scrolled) 30.dp else 52.dp, tween(250), label = "robotSize")
+            val robotAlpha by androidx.compose.animation.core.animateFloatAsState(if (scrolled) 0.45f else 1f, tween(250), label = "robotAlpha")
+            Row(Modifier.align(Alignment.Center).graphicsLayer { alpha = robotAlpha }, verticalAlignment = Alignment.CenterVertically) {
+                AiAvatar(size = robotSize, pulsing = isAiTyping, thinking = isAiTyping)
                 if (isAiTyping) {
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.assistant_status_typing), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
@@ -534,7 +541,7 @@ private fun AiAvatar(size: Dp, pulsing: Boolean = false, animated: Boolean = tru
             contentAlignment = Alignment.Center
         ) {
             val comp by com.airbnb.lottie.compose.rememberLottieComposition(
-                com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(if (thinking) R.raw.robot_chat else R.raw.robot_wave)
+                com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(if (thinking) R.raw.robot_think else R.raw.robot_face)
             )
             if (animated) {
                 com.airbnb.lottie.compose.LottieAnimation(
@@ -723,10 +730,10 @@ private fun ConversationList(
     isAiTyping: Boolean,
     errorText: String?,
     seenKeys: MutableSet<String>,
+    listState: androidx.compose.foundation.lazy.LazyListState,
     onRetry: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
-    val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val showJumpToLatest by remember { derivedStateOf { listState.firstVisibleItemIndex > 1 } }
     val reversed = remember(messages) { messages.asReversed() }
@@ -979,7 +986,7 @@ private fun TypingBubble() {
         Surface(
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomEnd = 20.dp, bottomStart = 4.dp),
             color = colors.surface,
-            border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.6f)),
+            border = BorderStroke(1.dp, colors.outline.copy(alpha = 0.7f)),
             shadowElevation = 2.dp
         ) {
             Box(Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
@@ -1133,7 +1140,7 @@ private fun ChatInputBar(
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     val borderColor by animateColorAsState(
-        targetValue = if (focused) colors.primary else colors.outlineVariant.copy(alpha = 0.7f),
+        targetValue = if (focused) colors.primary else colors.outline,
         label = "inputBorder"
     )
     val pillShape = RoundedCornerShape(28.dp)

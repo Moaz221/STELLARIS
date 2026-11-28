@@ -44,7 +44,7 @@ object ShareWithAi {
     }
 
     suspend fun questions(): String? {
-        val list = AppStore.load("questions", QuestionItem.serializer()).filter { !it.isAnswered }
+        val list = AppStore.load("questions", QuestionItem.serializer()).filter { it.status == "ACTIVE" }
         if (list.isEmpty()) return null
         return HEAD + "Questions I want to ask my doctor:\n" + list.joinToString("\n") { "- ${it.text}" }
     }

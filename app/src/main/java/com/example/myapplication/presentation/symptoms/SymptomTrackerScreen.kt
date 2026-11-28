@@ -52,6 +52,8 @@ fun SymptomTrackerScreen(
     val uiState by viewModel.uiState.collectAsState()
     val p = homePalette()
     val context = LocalContext.current
+    var showEmergency by remember { mutableStateOf(false) }
+    if (showEmergency) EmergencyCallDialog(onClose = { showEmergency = false })
     val clipboardManager = LocalClipboardManager.current
 
     Box(
@@ -79,12 +81,7 @@ fun SymptomTrackerScreen(
                 journeyType = uiState.journeyType,
                 onBack = onBack,
                 onEmergencyCall = {
-                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:123"))
-                    try {
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "Emergency hotline unavailable", Toast.LENGTH_SHORT).show()
-                    }
+                    showEmergency = true
                 }
             )
 
@@ -104,12 +101,7 @@ fun SymptomTrackerScreen(
                         EmergencySafetyBanner(
                             message = uiState.urgentAlertMessage,
                             onEmergencyCall = {
-                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:123"))
-                                try {
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "Emergency hotline unavailable", Toast.LENGTH_SHORT).show()
-                                }
+                                showEmergency = true
                             }
                         )
                     }
@@ -335,7 +327,6 @@ private fun SymptomTrackerTopBar(
             onClick = onEmergencyCall,
             modifier = Modifier
                 .size(42.dp)
-                .shadow(4.dp, CircleShape, ambientColor = p.alert)
                 .clip(CircleShape)
                 .background(p.alert.copy(alpha = 0.15f))
                 .border(1.5.dp, p.alert, CircleShape)
@@ -363,7 +354,6 @@ private fun EmergencySafetyBanner(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(12.dp, RoundedCornerShape(20.dp), ambientColor = p.alert.copy(alpha = 0.4f))
             .clip(RoundedCornerShape(20.dp))
             .background(
                 Brush.verticalGradient(
@@ -660,7 +650,6 @@ private fun SymptomCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(4.dp, RoundedCornerShape(20.dp), ambientColor = severityColor.copy(alpha = 0.15f))
             .clip(RoundedCornerShape(20.dp))
             .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom)))
             .border(
@@ -708,7 +697,7 @@ private fun SymptomCard(
                     }
 
                     Text(
-                        text = "${symptom.dateLogged} · ${symptom.frequency}",
+                        text = "${symptom.dateLogged} · ${com.example.myapplication.core.ui.frequencyLabel(symptom.frequency)}",
                         fontSize = 11.sp,
                         color = p.textSecondary
                     )
@@ -991,7 +980,11 @@ private fun AddEditSymptomDialog(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = freq,
+                                text = when (freq) {
+                                    "Occasional" -> com.example.myapplication.core.ui.loc("Occasional", "أحيانًا")
+                                    "Frequent" -> com.example.myapplication.core.ui.loc("Frequent", "متكرر")
+                                    else -> com.example.myapplication.core.ui.loc("Constant", "مستمر")
+                                },
                                 fontSize = 11.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = if (isSelected) p.accent else p.textPrimary

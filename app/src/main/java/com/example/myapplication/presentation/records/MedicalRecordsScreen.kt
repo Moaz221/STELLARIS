@@ -215,7 +215,6 @@ private fun RecordsTopBar(
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .shadow(6.dp, CircleShape, ambientColor = p.accent.copy(alpha = 0.3f))
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(p.accent, p.accentDeep)))
                 .clickable(onClick = onAdd),
@@ -321,7 +320,7 @@ private fun RecordTypeFilterRow(
                 RecordType.PRESCRIPTION -> Icons.Outlined.Medication
             }
             FilterChip(
-                label = type.label,
+                label = type.display(),
                 icon = icon,
                 isSelected = selectedType == type,
                 onClick = { onTypeSelected(type) }
@@ -409,7 +408,6 @@ private fun MedicalRecordCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(4.dp, RoundedCornerShape(20.dp))
             .clip(RoundedCornerShape(20.dp))
             .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom)))
             .border(
@@ -458,7 +456,7 @@ private fun MedicalRecordCard(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = record.type.label,
+                            text = record.type.display(),
                             fontSize = 11.sp,
                             color = p.textSecondary
                         )
@@ -740,7 +738,7 @@ private fun RecordDetailSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = record.type.label, fontSize = 13.sp, color = p.accent, fontWeight = FontWeight.Medium)
+                        Text(text = record.type.display(), fontSize = 13.sp, color = p.accent, fontWeight = FontWeight.Medium)
                         Text(text = "·", color = p.textTertiary)
                         Text(text = record.date, fontSize = 13.sp, color = p.textSecondary)
                     }
@@ -1075,7 +1073,7 @@ private fun AddRecordSheet(
                                     .padding(horizontal = 14.dp, vertical = 10.dp)
                             ) {
                                 Text(
-                                    text = type.label,
+                                    text = type.display(),
                                     fontSize = 12.sp,
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                                     color = if (isSelected) p.accent else p.textSecondary

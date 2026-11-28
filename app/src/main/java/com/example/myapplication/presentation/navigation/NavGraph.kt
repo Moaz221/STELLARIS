@@ -34,6 +34,7 @@ import com.example.myapplication.presentation.theme.MyApplicationTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlinx.coroutines.flow.first
 
 private const val NAVIGATION_LOG_TAG = "StellarisNavigation"
 
@@ -95,6 +96,14 @@ fun StellarisNavGraph() {
     }
     val localizedContext = remember(currentLanguageCode, context) {
         context.createConfigurationContext(localizedConfig)
+    }
+
+    // Make the real activity locale match the saved language so dialogs/sheets (separate windows) use it too.
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (AppCompatDelegate.getApplicationLocales().isEmpty) {
+            val saved = preferences.languageCode.first()
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(saved))
+        }
     }
 
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current

@@ -129,7 +129,7 @@ class SymptomTrackerViewModel : ViewModel() {
         frequency: String,
         triggers: String
     ) {
-        val currentDateStr = SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.getDefault()).format(Date())
+        val currentDateStr = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(Date())
         val existing = _uiState.value.symptomToEdit
 
         val updatedList = if (existing != null) {
@@ -239,9 +239,9 @@ class SymptomTrackerViewModel : ViewModel() {
 
         if (critical != null) {
             val msg = if (critical.category == SymptomCategory.CRITICAL_EMERGENCY || critical.severity == 5) {
-                "🚨 CRITICAL RED FLAG: \"${critical.name}\" requires immediate emergency medical evaluation. Please contact your doctor or local emergency line immediately."
+                com.example.myapplication.core.ui.locNow("🚨 CRITICAL RED FLAG: \"${critical.name}\" requires immediate emergency medical evaluation. Please contact your doctor or local emergency line immediately.", "🚨 علامة خطر شديدة: \"${critical.name}\" محتاجة تقييم طبي طارئ فورًا. اتصل بدكتورك أو بخط الطوارئ حالًا.")
             } else {
-                "⚠️ HIGH SEVERITY ALERT: You logged \"${critical.name}\" with severe intensity. Please inform your healthcare provider."
+                com.example.myapplication.core.ui.locNow("⚠️ HIGH SEVERITY ALERT: You logged \"${critical.name}\" with severe intensity. Please inform your healthcare provider.", "⚠️ تنبيه شدة عالية: سجّلت \"${critical.name}\" بشدة عالية. بلّغ مقدم الرعاية الصحية بتاعك.")
             }
             _uiState.value = _uiState.value.copy(
                 hasUrgentAlert = true,
