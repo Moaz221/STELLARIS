@@ -32,6 +32,31 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <receiver android:name=".widgets.NextReceiver" android:exported="true" android:label="@string/widget_next_desc">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_next_info" />
+        </receiver>
+        <receiver android:name=".widgets.JourneyReceiver" android:exported="true" android:label="@string/widget_journey_desc">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_journey_info" />
+        </receiver>
+        <receiver android:name=".widgets.SymptomReceiver" android:exported="true" android:label="@string/widget_symptom_desc">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_symptom_info" />
+        </receiver>
+        <receiver android:name=".widgets.QuestionsReceiver" android:exported="true" android:label="@string/widget_questions_desc">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_questions_info" />
+        </receiver>
+        <receiver android:name=".widgets.TipReceiver" android:exported="true" android:label="@string/widget_tip_desc">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_tip_info" />
+        </receiver>
+        <receiver android:name=".widgets.EmergencyReceiver" android:exported="true" android:label="@string/widget_emergency_desc">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_emergency_info" />
+        </receiver>
+
         <receiver android:name=".core.reminders.ReminderReceiver" android:exported="false" />
 
         <service
@@ -49,6 +74,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:label="@string/app_name"
             android:theme="@style/Theme.MyApplication">
         </activity>

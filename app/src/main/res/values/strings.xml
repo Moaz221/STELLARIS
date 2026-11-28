@@ -460,4 +460,10 @@
     <string name="profile_item_privpol_subtitle">What data the app uses and where it goes</string>
     <string name="profile_item_howuse_title">How to use the app</string>
     <string name="profile_item_howuse_subtitle">Step-by-step guide and full documentation</string>
+    <string name="widget_next_desc">Next medicine and appointment, with a Taken button</string>
+    <string name="widget_journey_desc">Your journey status</string>
+    <string name="widget_symptom_desc">Quick symptom log</string>
+    <string name="widget_questions_desc">Number of doctor questions waiting</string>
+    <string name="widget_tip_desc">Daily lung-health tip</string>
+    <string name="widget_emergency_desc">Emergency shortcut: opens the call picker</string>
 </resources>

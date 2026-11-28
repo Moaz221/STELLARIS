@@ -464,4 +464,10 @@
     <string name="profile_item_privpol_subtitle">البيانات اللي التطبيق بيستخدمها وبتروح فين</string>
     <string name="profile_item_howuse_title">إزاي تستخدم التطبيق</string>
     <string name="profile_item_howuse_subtitle">دليل خطوة بخطوة والتوثيق الكامل</string>
+    <string name="widget_next_desc">الدوا والموعد القادم مع زرار تم</string>
+    <string name="widget_journey_desc">حالة رحلتك</string>
+    <string name="widget_symptom_desc">تسجيل عرض سريع</string>
+    <string name="widget_questions_desc">عدد أسئلة الدكتور المنتظرة</string>
+    <string name="widget_tip_desc">نصيحة يومية لصحة الرئة</string>
+    <string name="widget_emergency_desc">اختصار الطوارئ: بيفتح اختيار الاتصال</string>
 </resources>

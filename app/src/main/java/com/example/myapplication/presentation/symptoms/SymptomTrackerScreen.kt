@@ -53,6 +53,9 @@ fun SymptomTrackerScreen(
     val p = homePalette()
     val context = LocalContext.current
     var showEmergency by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (com.example.myapplication.LaunchTarget.extra == "emergency") { com.example.myapplication.LaunchTarget.extra = null; showEmergency = true }
+    }
     if (showEmergency) EmergencyCallDialog(onClose = { showEmergency = false })
     val clipboardManager = LocalClipboardManager.current
 

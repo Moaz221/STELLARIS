@@ -153,6 +153,15 @@ fun MainScreen(
         activeOverlayName = screen.name
     }
 
+    val widgetTarget = com.example.myapplication.LaunchTarget.overlay
+    androidx.compose.runtime.LaunchedEffect(widgetTarget) {
+        val t = com.example.myapplication.LaunchTarget.overlay
+        if (t != null) {
+            com.example.myapplication.LaunchTarget.overlay = null
+            runCatching { OverlayScreen.valueOf(t) }.getOrNull()?.let { openOverlay(it) }
+        }
+    }
+
     BackHandler(
         enabled = activeOverlay != OverlayScreen.NONE ||
                 selectedTab != MainTab.Home
