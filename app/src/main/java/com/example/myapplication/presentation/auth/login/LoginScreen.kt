@@ -81,8 +81,8 @@ fun LoginScreen(
             Spacer(Modifier.height(48.dp))
 
             AuthHeader(
-                title = "Welcome Back",
-                subtitle = "Sign in to continue your analysis",
+                title = com.example.myapplication.core.ui.loc("Welcome Back", "مرحبًا بعودتك"),
+                subtitle = com.example.myapplication.core.ui.loc("Sign in to continue your analysis", "سجّل دخولك لتكمل"),
             )
 
             Spacer(Modifier.height(32.dp))
@@ -117,7 +117,7 @@ fun LoginScreen(
                     contentAlignment = Alignment.CenterEnd,
                 ) {
                     Text(
-                        text = "Forgot password?",
+                        text = com.example.myapplication.core.ui.loc("Forgot password?", "نسيت كلمة السر؟"),
                         color = StellarTeal,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -133,7 +133,7 @@ fun LoginScreen(
                 Spacer(Modifier.height(16.dp))
 
                 PrimaryButton(
-                    text = "Sign In",
+                    text = com.example.myapplication.core.ui.loc("Sign In", "تسجيل الدخول"),
                     isLoading = state.isLoading,
                     onClick = submit,
                 )
@@ -163,7 +163,7 @@ fun LoginScreen(
                 Spacer(Modifier.height(16.dp))
 
                 GoogleButton(
-                    text = "Sign in with Google",
+                    text = com.example.myapplication.core.ui.loc("Sign in with Google", "الدخول بحساب جوجل"),
                     isLoading = state.isLoading,
                     onClick = {
                         focus.clearFocus()
@@ -179,9 +179,9 @@ fun LoginScreen(
             Spacer(Modifier.height(28.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("New to STELLARIS? ", color = TextSecondary, fontSize = 14.sp)
+                Text(com.example.myapplication.core.ui.loc("New to STELLARIS? ", "جديد في STELLARIS؟ "), color = TextSecondary, fontSize = 14.sp)
                 Text(
-                    text = "Create account",
+                    text = com.example.myapplication.core.ui.loc("Create account", "إنشاء حساب"),
                     color = StellarTeal,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
@@ -198,7 +198,7 @@ fun LoginScreen(
                 containerColor = Color(0xFF0F1A2A),
                 title = {
                     Text(
-                        text = "Reset Password",
+                        text = com.example.myapplication.core.ui.loc("Reset Password", "استعادة كلمة السر"),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -207,7 +207,7 @@ fun LoginScreen(
                 text = {
                     Column {
                         Text(
-                            text = "Enter your email address to receive a password reset link.",
+                            text = com.example.myapplication.core.ui.loc("Enter your email address to receive a password reset link.", "اكتب بريدك الإلكتروني وهيوصلك رابط لإعادة تعيين كلمة السر."),
                             color = TextSecondary,
                             fontSize = 14.sp,
                         )
@@ -236,14 +236,14 @@ fun LoginScreen(
                 },
                 confirmButton = {
                     PrimaryButton(
-                        text = "Send Link",
+                        text = com.example.myapplication.core.ui.loc("Send Link", "إرسال الرابط"),
                         isLoading = state.isResetLoading,
                         onClick = viewModel::sendPasswordResetEmail,
                     )
                 },
                 dismissButton = {
                     TextButton(onClick = viewModel::closeForgotPasswordDialog) {
-                        Text("Cancel", color = TextSecondary)
+                        Text(com.example.myapplication.core.ui.loc("Cancel", "إلغاء"), color = TextSecondary)
                     }
                 },
             )

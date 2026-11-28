@@ -77,7 +77,7 @@ fun DoctorQuestionsScreen(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = com.example.myapplication.core.ui.loc("Back", "رجوع"),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
@@ -89,7 +89,7 @@ fun DoctorQuestionsScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = "Prepare key topics to discuss during your appointment",
+                    text = com.example.myapplication.core.ui.loc("Prepare key topics to discuss during your appointment", "جهّز النقاط المهمة تسأل عنها في الموعد"),
                     fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -105,7 +105,7 @@ fun DoctorQuestionsScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Add", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(com.example.myapplication.core.ui.loc("Add", "إضافة"), fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -169,7 +169,7 @@ fun DoctorQuestionsScreen(
                 OutlinedTextField(
                     value = newQuestionText,
                     onValueChange = { newQuestionText = it },
-                    label = { Text("Question text") },
+                    label = { Text(com.example.myapplication.core.ui.loc("Question text", "نص السؤال")) },
                     modifier = Modifier.fillMaxWidth()
                 )
             },
@@ -188,12 +188,12 @@ fun DoctorQuestionsScreen(
                         }
                     }
                 ) {
-                    Text("Save", fontWeight = FontWeight.Bold)
+                    Text(com.example.myapplication.core.ui.loc("Save", "حفظ"), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    Text(com.example.myapplication.core.ui.loc("Cancel", "إلغاء"))
                 }
             }
         )

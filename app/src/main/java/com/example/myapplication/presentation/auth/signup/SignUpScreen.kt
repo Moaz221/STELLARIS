@@ -80,7 +80,7 @@ fun SignUpScreen(
             IconButton(onClick = onBack) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = com.example.myapplication.core.ui.loc("Back", "رجوع"),
                     tint = TextPrimary,
                 )
             }
@@ -92,8 +92,8 @@ fun SignUpScreen(
                 Spacer(Modifier.height(16.dp))
 
                 AuthHeader(
-                    title = "Create Account",
-                    subtitle = "Your AI assistant for X-ray analysis starts here",
+                    title = com.example.myapplication.core.ui.loc("Create Account", "إنشاء حساب"),
+                    subtitle = com.example.myapplication.core.ui.loc("Your AI assistant for X-ray analysis starts here", "مساعدك الذكي لتحليل الأشعة بيبدأ من هنا"),
                 )
 
                 Spacer(Modifier.height(32.dp))
@@ -135,7 +135,7 @@ fun SignUpScreen(
                     Spacer(Modifier.height(16.dp))
 
                     PrimaryButton(
-                        text = "Create Account",
+                        text = com.example.myapplication.core.ui.loc("Create Account", "إنشاء حساب"),
                         isLoading = state.isLoading,
                         onClick = submit,
                     )
@@ -165,7 +165,7 @@ fun SignUpScreen(
                     Spacer(Modifier.height(16.dp))
 
                     GoogleButton(
-                        text = "Sign up with Google",
+                        text = com.example.myapplication.core.ui.loc("Sign up with Google", "التسجيل بحساب جوجل"),
                         isLoading = state.isLoading,
                         onClick = {
                             focus.clearFocus()

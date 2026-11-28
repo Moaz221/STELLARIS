@@ -298,7 +298,7 @@ private fun SymptomTrackerTopBar(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = com.example.myapplication.core.ui.loc("Back", "رجوع"),
                 tint = p.textPrimary
             )
         }
@@ -700,7 +700,7 @@ private fun SymptomCard(
                         if (symptom.isUrgent) {
                             Icon(
                                 imageVector = Icons.Default.WarningAmber,
-                                contentDescription = "Urgent",
+                                contentDescription = com.example.myapplication.core.ui.loc("Urgent", "عاجل"),
                                 tint = p.alert,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -722,7 +722,7 @@ private fun SymptomCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Severity ${symptom.severity}/5",
+                        text = com.example.myapplication.core.ui.loc("Severity ${symptom.severity}/5", "الشدة ${symptom.severity}/5"),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = severityColor
@@ -735,7 +735,7 @@ private fun SymptomCard(
                         onClick = { showMenu = true },
                         modifier = Modifier.size(28.dp)
                     ) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Options", tint = p.textSecondary)
+                        Icon(Icons.Default.MoreVert, contentDescription = com.example.myapplication.core.ui.loc("Options", "خيارات"), tint = p.textSecondary)
                     }
 
                     DropdownMenu(
@@ -788,7 +788,7 @@ private fun SymptomCard(
                 ) {
                     if (symptom.triggers.isNotBlank()) {
                         Text(
-                            text = "Triggers: ${symptom.triggers}",
+                            text = com.example.myapplication.core.ui.loc("Triggers: ${symptom.triggers}", "المحفزات: ${symptom.triggers}"),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                             color = p.accent
@@ -958,7 +958,7 @@ private fun AddEditSymptomDialog(
                             color = p.textSecondary
                         )
                         Text(
-                            text = "Severity $severity/5",
+                            text = com.example.myapplication.core.ui.loc("Severity $severity/5", "الشدة $severity/5"),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = when (severity) {

@@ -52,17 +52,20 @@ class FirebaseAuthRepository(
 
     override fun logout() = auth.signOut()
 
-    private fun Exception.toFriendlyMessage(): String =
-        when ((this as? FirebaseAuthException)?.errorCode) {
-            "ERROR_INVALID_EMAIL" -> "Invalid email address"
+    private fun Exception.toFriendlyMessage(): String {
+        val ar = java.util.Locale.getDefault().language == "ar"
+        fun t(en: String, arText: String) = if (ar) arText else en
+        return when ((this as? FirebaseAuthException)?.errorCode) {
+            "ERROR_INVALID_EMAIL" -> t("Invalid email address", "البريد الإلكتروني غير صحيح")
             "ERROR_WRONG_PASSWORD",
             "INVALID_LOGIN_CREDENTIALS",
-            "ERROR_INVALID_CREDENTIAL" -> "Wrong email or password"
-            "ERROR_USER_NOT_FOUND" -> "No account found with this email"
-            "ERROR_EMAIL_ALREADY_IN_USE" -> "This email is already registered"
-            "ERROR_WEAK_PASSWORD" -> "Password is too weak"
-            "ERROR_NETWORK_REQUEST_FAILED" -> "No internet connection"
-            "ERROR_TOO_MANY_REQUESTS" -> "Too many attempts, try again later"
-            else -> message ?: "Something went wrong, please try again"
+            "ERROR_INVALID_CREDENTIAL" -> t("Wrong email or password", "البريد أو كلمة السر غلط")
+            "ERROR_USER_NOT_FOUND" -> t("No account found with this email", "مفيش حساب بالبريد ده")
+            "ERROR_EMAIL_ALREADY_IN_USE" -> t("This email is already registered", "البريد ده مسجل قبل كده")
+            "ERROR_WEAK_PASSWORD" -> t("Password is too weak", "كلمة السر ضعيفة")
+            "ERROR_NETWORK_REQUEST_FAILED" -> t("No internet connection", "مفيش اتصال بالإنترنت")
+            "ERROR_TOO_MANY_REQUESTS" -> t("Too many attempts, try again later", "محاولات كتير، جرّب بعدين")
+            else -> t("Something went wrong, please try again", "حصل خطأ، جرّب تاني")
         }
+    }
 }
