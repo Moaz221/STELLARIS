@@ -105,6 +105,10 @@ fun MyHealthScreen(
                 }
             }
 
+            item(key = "quick_manage") {
+                QuickManageCard(version = uiState.activeSymptomCount * 1000 + uiState.unansweredCount * 10 + uiState.recentRecords.size) { viewModel.refresh(healthCtx.getSharedPreferences("stellaris_prefs", android.content.Context.MODE_PRIVATE).getString("journey", null)) }
+            }
+
             item(key = "risk_factor_editor") {
                 RiskFactorEditorCard(uiState.riskFactors.filter { it.isActive }.map { it.label }) { viewModel.setFactors(it) }
             }
@@ -553,9 +557,10 @@ private fun HealthSectionCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(10.dp, RoundedCornerShape(22.dp), ambientColor = p.accent.copy(alpha = 0.35f), spotColor = p.accent.copy(alpha = 0.35f))
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom)))
-            .border(1.dp, p.borderDim, RoundedCornerShape(22.dp))
+            .border(1.dp, Brush.linearGradient(listOf(p.accent.copy(alpha = 0.75f), p.borderBright.copy(alpha = 0.3f))), RoundedCornerShape(22.dp))
             .clickable(onClick = onClick)
             .padding(20.dp)
     ) {
@@ -951,9 +956,10 @@ private fun QuickEducationCard(onOpenEducation: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(10.dp, RoundedCornerShape(22.dp), ambientColor = p.accent.copy(alpha = 0.35f), spotColor = p.accent.copy(alpha = 0.35f))
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom)))
-            .border(1.dp, p.borderDim, RoundedCornerShape(22.dp))
+            .border(1.dp, Brush.linearGradient(listOf(p.accent.copy(alpha = 0.75f), p.borderBright.copy(alpha = 0.3f))), RoundedCornerShape(22.dp))
             .clickable(onClick = onOpenEducation)
             .padding(20.dp)
     ) {
@@ -1090,9 +1096,10 @@ private fun HealthTimelineCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(10.dp, RoundedCornerShape(22.dp), ambientColor = p.accent.copy(alpha = 0.35f), spotColor = p.accent.copy(alpha = 0.35f))
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom)))
-            .border(1.dp, p.borderDim, RoundedCornerShape(22.dp))
+            .border(1.dp, Brush.linearGradient(listOf(p.accent.copy(alpha = 0.75f), p.borderBright.copy(alpha = 0.3f))), RoundedCornerShape(22.dp))
             .clickable(onClick = onClick)
             .padding(20.dp)
     ) {
