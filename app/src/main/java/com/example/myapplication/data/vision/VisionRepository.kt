@@ -28,15 +28,17 @@ class VisionRepositoryImpl(
 
     override suspend fun analyzeXray(context: Context, imageUri: Uri): VisionResult = withContext(Dispatchers.IO) {
         try {
-            // 1) Convert Uri to temporary File (PNG)
-            val inputStream = context.contentResolver.openInputStream(imageUri)
-                ?: return@withContext VisionResult.Error("Cannot open image")
-            
+            // 1) Decode, downscale (max 1600 px) and re-encode as PNG
+            val opts = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            context.contentResolver.openInputStream(imageUri)?.use { android.graphics.BitmapFactory.decodeStream(it, null, opts) }
+            var sample = 1
+            while (opts.outWidth / sample > 1600 || opts.outHeight / sample > 1600) sample *= 2
+            val bmp = context.contentResolver.openInputStream(imageUri)?.use {
+                android.graphics.BitmapFactory.decodeStream(it, null, android.graphics.BitmapFactory.Options().apply { inSampleSize = sample })
+            } ?: return@withContext VisionResult.Error("Cannot open image")
             val tempFile = File(context.cacheDir, "xray_${UUID.randomUUID()}.png")
-            FileOutputStream(tempFile).use { output ->
-                inputStream.copyTo(output)
-            }
-            inputStream.close()
+            FileOutputStream(tempFile).use { out -> bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out) }
+            bmp.recycle()
 
             // 2) Validate size (max 10MB)
             if (tempFile.length() > (10 * 1024 * 1024)) {

@@ -53,6 +53,12 @@ fun VisionLabScreen(
         uri?.let { viewModel.onImageSelected(it) }
     }
 
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    var cameraUri by remember { androidx.compose.runtime.mutableStateOf<android.net.Uri?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) cameraUri?.let { viewModel.onImageSelected(it) }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -207,7 +213,7 @@ fun VisionLabScreen(
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = state.errorMessage ?: stringResource(R.string.error_generic),
+                                text = state.errorRes?.let { stringResource(it) } ?: stringResource(R.string.error_generic),
                                 fontSize = 13.sp,
                                 color = p.urgent
                             )
@@ -232,6 +238,25 @@ fun VisionLabScreen(
                     Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(stringResource(R.string.pick_photo), fontWeight = FontWeight.Bold)
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        val dir = java.io.File(ctx.cacheDir, "camera").apply { mkdirs() }
+                        val f = java.io.File(dir, "xray_${System.currentTimeMillis()}.jpg")
+                        val uri = androidx.core.content.FileProvider.getUriForFile(ctx, ctx.packageName + ".fileprovider", f)
+                        cameraUri = uri
+                        cameraLauncher.launch(uri)
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = state.state != VisionUiState.ANALYZING
+                ) {
+                    Icon(Icons.Default.CameraEnhance, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.take_photo), fontWeight = FontWeight.Bold)
                 }
 
                 Button(

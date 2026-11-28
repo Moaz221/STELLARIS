@@ -459,4 +459,5 @@
     <string name="profile_app_version">LungCare AI · الإصدار %1$s</string>
     <string name="share_ai_button">شارك مع المساعد</string>
     <string name="share_ai_nothing">مفيش بيانات محفوظة تتشارك. ضيف بيانات الأول.</string>
+    <string name="take_photo">التقط صورة</string>
 </resources>
