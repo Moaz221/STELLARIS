@@ -17,6 +17,7 @@ import com.example.myapplication.MainActivity
 import com.example.myapplication.core.model.Medication
 import com.example.myapplication.data.local.AppStore
 import java.util.Calendar
+import com.example.myapplication.core.ui.locNow
 
 /** Daily medication reminders. Uses inexact alarms, so no special alarm permission is needed. */
 object ReminderScheduler {
@@ -85,8 +86,8 @@ class ReminderReceiver : BroadcastReceiver() {
             val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             val n = NotificationCompat.Builder(context, ReminderScheduler.CHANNEL)
                 .setSmallIcon(android.R.drawable.ic_popup_reminder)
-                .setContentTitle(name.ifBlank { "Medication reminder" })
-                .setContentText(text.ifBlank { "Time to take your medication" })
+                .setContentTitle(name.ifBlank { locNow("Medication reminder", "تنبيه الدوا") })
+                .setContentText(text.ifBlank { locNow("Time to take your medication", "جه ميعاد الدوا") })
                 .setContentIntent(open).setAutoCancel(true).build()
             NotificationManagerCompat.from(context).notify(code, n)
         }

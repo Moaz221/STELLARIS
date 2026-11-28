@@ -1,5 +1,6 @@
 package com.example.myapplication.presentation.myhealth
 
+import kotlinx.serialization.builtins.serializer
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.ViewModel
@@ -127,6 +128,14 @@ class MyHealthViewModel : ViewModel() {
         refresh()
     }
 
+    /** Saves the user's own risk-factor list (first item is a marker meaning "custom list in use"). */
+    fun setFactors(list: List<String>) {
+        viewModelScope.launch {
+            com.example.myapplication.data.local.AppStore.save("risk_factors_custom", String.serializer(), listOf("\u0000") + list)
+            refresh()
+        }
+    }
+
     fun setJourney(journey: JourneyType) {
         _uiState.value = _uiState.value.copy(journeyType = journey)
     }
@@ -149,6 +158,10 @@ class MyHealthViewModel : ViewModel() {
                 // Risk "factors" = the lines of the saved check summary (what the user answered), newest check only.
                 val factorLine = risk?.summary.orEmpty().lines().map { it.trim() }.firstOrNull { it.startsWith("Risk factors:", true) || it.startsWith("عوامل الخطر:") }
                 val factors = factorLine?.substringAfter(":")?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }.orEmpty()
+                    .let { parsed ->
+                        val custom = com.example.myapplication.data.local.AppStore.load("risk_factors_custom", String.serializer())
+                        if (custom.isNotEmpty() && custom.first() == "\u0000") custom.drop(1) else parsed
+                    }
                     .mapIndexed { i, l -> RiskFactor("rf$i", l, true) }
                 val activeQuestions = questions.filter { it.status == "ACTIVE" }
                 val journey = runCatching { JourneyType.valueOf(savedJourney ?: "") }.getOrNull() ?: _uiState.value.journeyType

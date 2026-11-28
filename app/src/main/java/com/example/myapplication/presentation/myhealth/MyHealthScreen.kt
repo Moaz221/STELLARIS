@@ -105,6 +105,10 @@ fun MyHealthScreen(
                 }
             }
 
+            item(key = "risk_factor_editor") {
+                RiskFactorEditorCard(uiState.riskFactors.filter { it.isActive }.map { it.label }) { viewModel.setFactors(it) }
+            }
+
             // Journey-aware overview card
             item(key = "overview") {
                 AnimatedContent(
@@ -718,10 +722,10 @@ private fun RecordsPreview(records: List<MedicalRecord>) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                val statusColor = when (record.status) {
-                    "Normal" -> p.success
-                    "Abnormal" -> p.alert
-                    "Pending" -> p.warning
+                val statusColor = when (record.status.uppercase()) {
+                    "NORMAL" -> p.success
+                    "ABNORMAL" -> p.alert
+                    "PENDING" -> p.warning
                     else -> p.textSecondary
                 }
 
@@ -748,7 +752,12 @@ private fun RecordsPreview(records: List<MedicalRecord>) {
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text = record.status,
+                        text = when (record.status.uppercase()) {
+                            "NORMAL" -> com.example.myapplication.core.ui.loc("Normal", "طبيعي")
+                            "ABNORMAL" -> com.example.myapplication.core.ui.loc("Abnormal", "غير طبيعي")
+                            "PENDING" -> com.example.myapplication.core.ui.loc("Pending", "قيد الانتظار")
+                            else -> com.example.myapplication.core.ui.loc("Unknown", "غير معروف")
+                        },
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = statusColor
@@ -1187,5 +1196,51 @@ private fun MedicalDisclaimerCard() {
                 color = p.textTertiary
             )
         }
+    }
+}
+
+
+/** Add, edit and delete the risk factors that apply to you. Saved on the phone only. */
+@Composable
+private fun RiskFactorEditorCard(factors: List<String>, onChange: (List<String>) -> Unit) {
+    val p = homePalette()
+    var editIndex by remember { mutableStateOf<Int?>(null) }   // -1 = new
+    var draft by remember { mutableStateOf("") }
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
+            .background(Brush.verticalGradient(listOf(p.cardTop, p.cardBottom))).border(1.dp, p.borderBright, RoundedCornerShape(20.dp)).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(com.example.myapplication.core.ui.loc("My risk factors", "عوامل الخطر عندي"), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = p.textPrimary, modifier = Modifier.weight(1f))
+            TextButton(onClick = { draft = ""; editIndex = -1 }) { Text(com.example.myapplication.core.ui.loc("+ Add", "+ إضافة"), color = p.accent, fontWeight = FontWeight.Bold) }
+        }
+        if (factors.isEmpty()) {
+            Text(com.example.myapplication.core.ui.loc("Nothing added. Add a factor such as smoking, family history or exposure to dust.", "لسه مفيش حاجة. ضيف عامل زي التدخين أو تاريخ عائلي أو التعرض للغبار."), fontSize = 13.sp, color = p.textSecondary)
+        }
+        factors.forEachIndexed { i, f ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(8.dp).clip(CircleShape).background(p.warning))
+                Spacer(Modifier.width(8.dp))
+                Text(f, fontSize = 14.sp, color = p.textPrimary, modifier = Modifier.weight(1f))
+                TextButton(onClick = { draft = f; editIndex = i }) { Text(com.example.myapplication.core.ui.loc("Edit", "تعديل"), color = p.accent) }
+                TextButton(onClick = { onChange(factors.filterIndexed { j, _ -> j != i }) }) { Text(com.example.myapplication.core.ui.loc("Delete", "حذف"), color = p.alert) }
+            }
+        }
+    }
+    editIndex?.let { idx ->
+        AlertDialog(
+            onDismissRequest = { editIndex = null },
+            title = { Text(if (idx < 0) com.example.myapplication.core.ui.loc("Add risk factor", "إضافة عامل خطر") else com.example.myapplication.core.ui.loc("Edit risk factor", "تعديل عامل الخطر")) },
+            text = { OutlinedTextField(value = draft, onValueChange = { draft = it }, singleLine = true) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val t = draft.trim()
+                    if (t.isNotEmpty()) onChange(if (idx < 0) factors + t else factors.mapIndexed { j, x -> if (j == idx) t else x })
+                    editIndex = null
+                }) { Text(com.example.myapplication.core.ui.loc("Save", "حفظ")) }
+            },
+            dismissButton = { TextButton(onClick = { editIndex = null }) { Text(com.example.myapplication.core.ui.loc("Cancel", "إلغاء")) } }
+        )
     }
 }

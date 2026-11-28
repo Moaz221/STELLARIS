@@ -15,8 +15,8 @@ android {
         applicationId = "com.example.myapplication"
         minSdk = 26
         targetSdk = 36
-        versionCode = 14
-        versionName = "Optimal build 14"
+        versionCode = 15
+        versionName = "Optimal build 15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
