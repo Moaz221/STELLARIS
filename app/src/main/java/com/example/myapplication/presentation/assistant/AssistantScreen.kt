@@ -264,8 +264,9 @@ fun AssistantContent(
             .navigationBarsPadding()
             .imePadding()
     ) {
-        AssistantHeader(
+        FloatingAssistantBar(
             isAiTyping = isAiTyping,
+            showRobot = hasConversation,
             canStartNew = hasConversation,
             onBack = onBack,
             onOpenHistory = onOpenHistory,
@@ -342,6 +343,54 @@ private fun RestoringIndicator() {
 }
 
 /* ───────────────────────── Header ───────────────────────── */
+
+@Composable
+private fun RoundIconButton(icon: ImageVector, description: String, enabled: Boolean = true, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = CircleShape,
+        color = colors.surface.copy(alpha = 0.85f),
+        border = BorderStroke(1.dp, colors.outline.copy(alpha = if (enabled) 0.7f else 0.3f)),
+        shadowElevation = 3.dp,
+        modifier = Modifier.size(42.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = description, tint = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = 0.38f), modifier = Modifier.size(21.dp))
+        }
+    }
+}
+
+/** No app bar: transparent row with floating round buttons and a small animated robot. */
+@Composable
+private fun FloatingAssistantBar(
+    isAiTyping: Boolean,
+    showRobot: Boolean,
+    canStartNew: Boolean,
+    onBack: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onNewChat: () -> Unit
+) {
+    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).height(56.dp)) {
+        Box(Modifier.align(Alignment.CenterStart)) {
+            RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.chat_back), onClick = onBack)
+        }
+        if (showRobot) {
+            Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
+                AiAvatar(size = 48.dp, pulsing = isAiTyping, thinking = isAiTyping)
+                if (isAiTyping) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.assistant_status_typing), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
+                }
+            }
+        }
+        Row(Modifier.align(Alignment.CenterEnd), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            RoundIconButton(Icons.Filled.Add, stringResource(R.string.chat_new_chat), enabled = canStartNew, onClick = onNewChat)
+            RoundIconButton(Icons.Outlined.History, stringResource(R.string.chat_history), onClick = onOpenHistory)
+        }
+    }
+}
 
 @Composable
 private fun AssistantHeader(
@@ -450,7 +499,7 @@ private fun AssistantHeader(
 }
 
 @Composable
-private fun AiAvatar(size: Dp, pulsing: Boolean = false) {
+private fun AiAvatar(size: Dp, pulsing: Boolean = false, animated: Boolean = true, thinking: Boolean = false) {
     val colors = MaterialTheme.colorScheme
     Box(modifier = Modifier.size(size), contentAlignment = Alignment.Center) {
         if (pulsing) {
@@ -484,12 +533,22 @@ private fun AiAvatar(size: Dp, pulsing: Boolean = false) {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Filled.AutoAwesome,
-                contentDescription = null,
-                tint = colors.onPrimary,
-                modifier = Modifier.size(size * 0.5f)
+            val comp by com.airbnb.lottie.compose.rememberLottieComposition(
+                com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(if (thinking) R.raw.robot_chat else R.raw.robot_wave)
             )
+            if (animated) {
+                com.airbnb.lottie.compose.LottieAnimation(
+                    composition = comp,
+                    iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever,
+                    modifier = Modifier.fillMaxSize(0.92f)
+                )
+            } else {
+                com.airbnb.lottie.compose.LottieAnimation(
+                    composition = comp,
+                    progress = { 0.35f },
+                    modifier = Modifier.fillMaxSize(0.92f)
+                )
+            }
         }
     }
 }
@@ -564,7 +623,7 @@ private fun WelcomeHero(userName: String, onPromptClick: (String) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        HeroOrb(size = 76.dp)
+        HeroOrb(size = 104.dp)
         Spacer(Modifier.height(4.dp))
         Text(
             text = stringResource(R.string.assistant_welcome_title, userName),
@@ -792,7 +851,7 @@ private fun AiBubble(message: ChatMessage, typewriter: Boolean) {
             .padding(end = 32.dp),
         verticalAlignment = Alignment.Top
     ) {
-        AiAvatar(size = 32.dp)
+        AiAvatar(size = 32.dp, animated = false)
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f, fill = false)) {
             Surface(
@@ -915,7 +974,7 @@ private fun TypingBubble() {
         verticalAlignment = Alignment.Top,
         modifier = Modifier.semantics { contentDescription = typingLabel }
     ) {
-        AiAvatar(size = 32.dp)
+        AiAvatar(size = 36.dp, thinking = true)
         Spacer(Modifier.width(10.dp))
         Surface(
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomEnd = 20.dp, bottomStart = 4.dp),

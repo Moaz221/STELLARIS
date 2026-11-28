@@ -330,6 +330,16 @@ private fun StellarisBottomBar(
                                 modifier = Modifier.size(28.dp),
                                 contentAlignment = Alignment.Center
                             ) {
+                                if (tab == MainTab.Assistant) {
+                                    val robot by com.airbnb.lottie.compose.rememberLottieComposition(
+                                        com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(R.raw.robot_wave)
+                                    )
+                                    com.airbnb.lottie.compose.LottieAnimation(
+                                        composition = robot,
+                                        iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever,
+                                        modifier = Modifier.size(34.dp)
+                                    )
+                                } else
                                 Icon(
                                     imageVector = tab.icon,
 
